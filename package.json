@@ -1,0 +1,26 @@
+{
+  "name": "student-os-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.4.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @student-os/api --filter @student-os/web dev",
+    "dev:api": "pnpm --filter @student-os/api dev",
+    "dev:web": "pnpm --filter @student-os/web dev",
+    "build": "pnpm -r --filter \"!@student-os/e2e-tests\" build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r --filter \"!@student-os/e2e-tests\" test",
+    "test:e2e": "pnpm --filter @student-os/e2e-tests test",
+    "db:generate": "pnpm --filter @student-os/database generate",
+    "db:push": "pnpm --filter @student-os/database push",
+    "db:seed": "pnpm --filter @student-os/database seed",
+    "clean": "pnpm -r exec rimraf dist node_modules"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.2",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.2"
+  }
+}

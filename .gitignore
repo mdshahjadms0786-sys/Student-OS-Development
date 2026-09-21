@@ -1,0 +1,31 @@
+node_modules
+.pnpm-store
+dist
+build
+.turbo
+.next
+coverage
+*.log
+.env
+.env.local
+.env.*.local
+*.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+
+# Uploads / Storage
+uploads/
+storage/
+temp/
+
+# Prisma SQLite dev (if used) or generated files
+*.db
+*.db-journal

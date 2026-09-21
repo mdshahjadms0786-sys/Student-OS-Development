@@ -1,0 +1,321 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  FACULTY
+  ADMIN
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskCategory {
+  ASSIGNMENT
+  PROJECT
+  STUDY
+  REVISION
+  OTHER
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+  OVERDUE
+}
+
+enum ClassType {
+  LECTURE
+  LAB
+  TUTORIAL
+  WORKSHOP
+  OTHER
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  EXCUSED
+  CANCELLED
+}
+
+enum ExamStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum NotificationType {
+  CLASS
+  ASSIGNMENT
+  EXAM
+  ATTENDANCE
+  TASK
+  SUMMARY
+  SYSTEM
+}
+
+model User {
+  id           String          @id @default(uuid())
+  email        String          @unique
+  passwordHash String
+  name         String
+  role         Role            @default(STUDENT)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  profile                 StudentProfile?
+  subjects                Subject[]
+  timetableEntries        TimetableEntry[]
+  tasks                   Task[]
+  events                  Event[]
+  attendanceRecords       AttendanceRecord[]
+  exams                   Exam[]
+  notes                   Note[]
+  notifications           Notification[]
+  notificationPreferences NotificationPreference[]
+  studySessions           StudySession[]
+  attachments             Attachment[]
+  sessions                Session[]
+
+  @@index([email])
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  data      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model StudentProfile {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  program      String?
+  semester     Int?
+  section      String?
+  batch        String?
+  academicYear String?
+  targetAttendance Float @default(75.0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Subject {
+  id          String   @id @default(uuid())
+  userId      String
+  code        String
+  name        String
+  credits     Int      @default(3)
+  facultyName String?
+  color       String?  @default("#3b82f6")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timetableEntries  TimetableEntry[]
+  attendanceRecords AttendanceRecord[]
+  tasks             Task[]
+  exams             Exam[]
+  notes             Note[]
+  studySessions     StudySession[]
+
+  @@index([userId])
+}
+
+model TimetableEntry {
+  id        String    @id @default(uuid())
+  userId    String
+  subjectId String
+  dayOfWeek Int       // 1 = Monday, 7 = Sunday
+  startTime String    // Format "HH:mm" (e.g., "09:00")
+  endTime   String    // Format "HH:mm" (e.g., "10:30")
+  room      String?
+  faculty   String?
+  type      ClassType @default(LECTURE)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@index([userId, dayOfWeek])
+  @@index([subjectId])
+}
+
+model Task {
+  id          String       @id @default(uuid())
+  userId      String
+  subjectId   String?
+  title       String
+  description String?      @db.Text
+  dueAt       DateTime
+  priority    Priority     @default(MEDIUM)
+  category    TaskCategory @default(ASSIGNMENT)
+  status      TaskStatus   @default(TODO)
+  completedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+  @@index([userId, dueAt])
+}
+
+model Event {
+  id            String   @id @default(uuid())
+  userId        String
+  type          String   @default("GENERAL")
+  title         String
+  description   String?  @db.Text
+  startAt       DateTime
+  endAt         DateTime
+  relatedEntity String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startAt, endAt])
+}
+
+model AttendanceRecord {
+  id        String           @id @default(uuid())
+  userId    String
+  subjectId String
+  date      DateTime         @default(now())
+  status    AttendanceStatus @default(PRESENT)
+  remarks   String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@index([userId, subjectId])
+  @@index([date])
+}
+
+model Exam {
+  id                  String     @id @default(uuid())
+  userId              String
+  subjectId           String
+  title               String
+  examAt              DateTime
+  room                String?
+  syllabus            String?    @db.Text
+  preparationProgress Int        @default(0) // 0-100%
+  status              ExamStatus @default(UPCOMING)
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@index([userId, examAt])
+  @@index([subjectId])
+}
+
+model Note {
+  id        String   @id @default(uuid())
+  userId    String
+  subjectId String?
+  title     String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+
+  @@index([userId, subjectId])
+  @@index([title])
+}
+
+model Notification {
+  id            String           @id @default(uuid())
+  userId        String
+  type          NotificationType @default(SYSTEM)
+  title         String
+  message       String
+  readAt        DateTime?
+  scheduledAt   DateTime         @default(now())
+  relatedEntity String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([scheduledAt])
+}
+
+model NotificationPreference {
+  id            String           @id @default(uuid())
+  userId        String
+  type          NotificationType
+  enabled       Boolean          @default(true)
+  timingMinutes Int              @default(30)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+}
+
+model StudySession {
+  id              String    @id @default(uuid())
+  userId          String
+  subjectId       String?
+  startedAt       DateTime  @default(now())
+  endedAt         DateTime?
+  durationMinutes Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+
+  @@index([userId, startedAt])
+}
+
+model Attachment {
+  id         String   @id @default(uuid())
+  userId     String
+  entityType String   // e.g., "NOTE", "TASK"
+  entityId   String
+  storageKey String
+  filename   String
+  size       Int
+  mimeType   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, entityType, entityId])
+}
