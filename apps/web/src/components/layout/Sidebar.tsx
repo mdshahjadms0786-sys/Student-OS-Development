@@ -9,6 +9,7 @@ import {
   FileText,
   Bell,
   Settings,
+  BookOpen
 } from 'lucide-react';
 import { cn } from '@student-os/ui';
 
@@ -22,6 +23,7 @@ const mainNavItems: NavItem[] = [
   { name: 'Home', href: '#home', icon: Home },
   { name: 'Today', href: '#today', icon: Clock },
   { name: 'Timetable', href: '#timetable', icon: CalendarDays },
+  { name: 'Subjects', href: '#subjects', icon: BookOpen },
   { name: 'Calendar', href: '#calendar', icon: Calendar },
   { name: 'Tasks', href: '#tasks', icon: CheckSquare },
   { name: 'Attendance', href: '#attendance', icon: UserCheck },

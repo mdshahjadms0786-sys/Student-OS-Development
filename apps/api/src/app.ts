@@ -10,6 +10,10 @@ import { env } from './config/env.js';
 import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
 import { healthRouter } from './modules/health/health.router.js';
 import { authRouter } from './modules/auth/auth.router.js';
+import { profileRouter } from './modules/profile/profile.router.js';
+import { subjectsRouter } from './modules/subjects/subjects.router.js';
+import { timetableRouter } from './modules/timetable/timetable.router.js';
+import { dashboardRouter } from './modules/dashboard/dashboard.router.js';
 
 export function createApp(): Express {
   const app = express();
@@ -70,6 +74,10 @@ export function createApp(): Express {
   // API Routes
   app.use('/api', healthRouter);
   app.use('/api/auth', authRouter);
+  app.use('/api/profile', profileRouter);
+  app.use('/api/subjects', subjectsRouter);
+  app.use('/api/timetable', timetableRouter);
+  app.use('/api/dashboard', dashboardRouter);
 
   // Error Handling
   app.use(notFoundHandler);

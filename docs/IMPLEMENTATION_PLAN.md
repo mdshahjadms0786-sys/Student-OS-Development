@@ -572,13 +572,13 @@ Recommended pipeline:
 - **Authentication**: Session-based authentication with secure httpOnly cookies - *Confirmed by User*
 - **File Storage**: Local filesystem adapter for development, cloud-ready (S3/Cloudflare R2) - *Confirmed by User*
 - **Testing**: Vitest (Unit/Integration) and Playwright (E2E) - *Confirmed by User*
+- **Timetable Overlap Policy**: Overlapping timetable entries are rejected with 409 Conflict status - *Implemented in Phase 1*
 
 ## Remaining Decisions For Later Phases
 
-- Should timetable overlaps block creation or show a dismissible warning by default? (Phase 1)
 - Should attendance input in Phase 3 default to per-class session log or aggregate percentage update? (Phase 3)
 - Which public license (e.g. MIT, Apache 2.0) should be included in the repository root? (Phase 5)
 
 ## Immediate Next Step
 
-Phase 0 is complete. Awaiting user review and authorization to proceed to **Phase 1 — Foundation** (Auth, Profile, Design System, Home, Today, Timetable).
+Phase 1 is complete and fully verified. Awaiting user review and authorization to proceed to **Phase 2 — Productivity** (Tasks, Calendar, Unified Timeline, Notification foundations).

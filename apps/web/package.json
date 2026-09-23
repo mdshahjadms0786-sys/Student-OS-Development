@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.9.1",
     "@student-os/contracts": "workspace:*",
     "@student-os/ui": "workspace:*",
     "@tanstack/react-query": "^5.66.9",
