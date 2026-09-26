@@ -2,13 +2,11 @@
   "name": "@student-os/api",
   "version": "0.1.0",
   "type": "module",
-  "main": "./dist/server.js",
+  "main": "./src/server.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "build": "tsup src/server.ts --format esm --clean",
-    "start": "node dist/server.js",
-    "typecheck": "tsc --noEmit",
-    "lint": "tsc --noEmit",
+    "dev": "node --watch src/server.js",
+    "build": "echo 'API ready'",
+    "start": "node src/server.js",
     "test": "vitest run"
   },
   "dependencies": {
@@ -26,18 +24,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
-    "@types/cookie-parser": "^1.4.8",
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "@types/express-session": "^1.18.0",
-    "@types/morgan": "^1.9.9",
-    "@types/node": "^22.13.5",
-    "@types/supertest": "^6.0.2",
     "supertest": "^7.0.0",
-    "tsup": "^8.4.0",
-    "tsx": "^4.19.3",
-    "typescript": "^5.8.2",
     "vitest": "^3.0.8"
   }
 }

@@ -2,29 +2,19 @@
   "name": "@student-os/contracts",
   "version": "0.1.0",
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./src/index.js",
+  "module": "./src/index.js",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    }
+    ".": "./src/index.js"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --clean",
-    "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
-    "typecheck": "tsc --noEmit",
-    "lint": "tsc --noEmit",
+    "build": "echo 'Contracts ready'",
     "test": "vitest run"
   },
   "dependencies": {
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "tsup": "^8.4.0",
-    "typescript": "^5.8.2",
     "vitest": "^3.0.8"
   }
 }

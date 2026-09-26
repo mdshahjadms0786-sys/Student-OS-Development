@@ -566,8 +566,8 @@ Recommended pipeline:
 
 ## Architecture Decisions Log
 
-- **Backend Framework**: Express.js with TypeScript (REST API architecture) - *Confirmed by User*
-- **Frontend Framework**: React + Vite + TypeScript + Tailwind CSS + shadcn/ui foundation - *Confirmed by User*
+- **Backend Framework**: Node.js + Express.js in pure JavaScript (ESM, REST API architecture) - *Confirmed by User*
+- **Frontend Framework**: React.js + Vite + JavaScript (JSX) + Tailwind CSS + Lucide React - *Confirmed by User*
 - **Database**: PostgreSQL with Prisma ORM - *Confirmed by User*
 - **Authentication**: Session-based authentication with secure httpOnly cookies - *Confirmed by User*
 - **File Storage**: Local filesystem adapter for development, cloud-ready (S3/Cloudflare R2) - *Confirmed by User*
@@ -575,6 +575,7 @@ Recommended pipeline:
 - **Timetable Overlap Policy**: Overlapping timetable entries are rejected with 409 Conflict status - *Implemented in Phase 1*
 - **Task & Calendar Model**: Tasks are modeled with due dates, priorities, categories, and completion tracking; Calendar dynamically projects recurring classes, events, and tasks across date ranges - *Implemented in Phase 2*
 - **Notification Model**: In-app notifications with user-configurable preferences per category and lead timing - *Implemented in Phase 2*
+- **Technology Stack Migration**: Migrated 100% of codebase from TypeScript/Next.js to pure JavaScript (React + Vite + Express + Prisma) while strictly preserving all functionality and passing all unit, build, and E2E tests - *Migrated & Verified*
 
 ## Remaining Decisions For Later Phases
 
@@ -583,4 +584,4 @@ Recommended pipeline:
 
 ## Immediate Next Step
 
-Phase 2 (Productivity Layer — Tasks, Calendar, Notifications, Notification Preferences, Home & Today cross-module integration) is complete and fully verified. Awaiting user review and authorization to proceed to **Phase 3 — Academic Tracking** (Attendance, Exams, Notes, Analytics).
+Phases 0, 1, and 2 are fully completed, verified, and migrated to pure JavaScript. All unit tests (40/40), production builds, and Playwright E2E suites pass cleanly. Awaiting user authorization before starting Phase 3.

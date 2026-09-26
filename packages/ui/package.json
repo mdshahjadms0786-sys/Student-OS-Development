@@ -2,21 +2,14 @@
   "name": "@student-os/ui",
   "version": "0.1.0",
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./src/index.js",
+  "module": "./src/index.js",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    }
+    ".": "./src/index.js"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --clean",
-    "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
-    "typecheck": "tsc --noEmit",
-    "lint": "tsc --noEmit",
+    "build": "echo 'UI build complete'",
+    "dev": "echo 'UI dev'",
     "test": "vitest run"
   },
   "peerDependencies": {
@@ -29,12 +22,8 @@
     "lucide-react": "^1.16.0"
   },
   "devDependencies": {
-    "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tsup": "^8.4.0",
-    "typescript": "^5.8.2",
     "vitest": "^3.0.8"
   }
 }

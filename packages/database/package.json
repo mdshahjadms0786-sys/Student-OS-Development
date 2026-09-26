@@ -2,24 +2,17 @@
   "name": "@student-os/database",
   "version": "0.1.0",
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./src/index.js",
+  "module": "./src/index.js",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    }
+    ".": "./src/index.js"
   },
   "scripts": {
     "generate": "prisma generate",
     "push": "prisma db push",
     "migrate:dev": "prisma migrate dev",
-    "seed": "tsx src/seed.ts",
-    "build": "prisma generate && tsup src/index.ts --format esm,cjs --dts --clean",
-    "typecheck": "tsc --noEmit",
-    "lint": "tsc --noEmit",
+    "seed": "node src/seed.js",
+    "build": "prisma generate",
     "test": "vitest run"
   },
   "dependencies": {
@@ -27,9 +20,6 @@
   },
   "devDependencies": {
     "prisma": "^6.4.1",
-    "tsup": "^8.4.0",
-    "tsx": "^4.19.3",
-    "typescript": "^5.8.2",
     "vitest": "^3.0.8"
   }
 }
