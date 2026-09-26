@@ -77,6 +77,24 @@ export function createApp() {
 
   app.use('/api', apiLimiter);
 
+  // Root endpoint info
+  app.get('/', (_req, res) => {
+    res.status(200).json({
+      success: true,
+      message: 'Student OS API Server is running',
+      version: '0.1.0',
+      clientUrl: env.CLIENT_URL || 'http://localhost:5173',
+      endpoints: {
+        health: '/api/health',
+        auth: '/api/auth',
+        dashboard: '/api/dashboard',
+        tasks: '/api/tasks',
+        calendar: '/api/calendar',
+        notifications: '/api/notifications',
+      },
+    });
+  });
+
   // API Routes
   app.use('/api', healthRouter);
   app.use('/api/auth', authRouter);
