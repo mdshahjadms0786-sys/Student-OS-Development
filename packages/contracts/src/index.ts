@@ -4,3 +4,6 @@ export * from './user.schema.js';
 export * from './subject.schema.js';
 export * from './timetable.schema.js';
 export * from './dashboard.schema.js';
+export * from './task.schema.js';
+export * from './calendar.schema.js';
+export * from './notification.schema.js';

@@ -31,3 +31,8 @@ temp/
 # Prisma SQLite dev (if used) or generated files
 *.db
 *.db-journal
+
+# Test artifacts
+playwright-report/
+test-results/
+

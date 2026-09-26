@@ -18,7 +18,7 @@ export function AppShell({
 }: AppShellProps) {
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-950">
-      <Header user={user} />
+      <Header user={user} onNavigate={onNavigate} />
       <div className="flex flex-1">
         <Sidebar currentPath={currentPath} onNavigate={onNavigate} />
         <main className="flex-1 px-4 py-6 pb-20 sm:px-6 lg:px-8 lg:pb-8">

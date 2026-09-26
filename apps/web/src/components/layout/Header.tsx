@@ -1,17 +1,46 @@
+import * as React from 'react';
 import { Sun, Moon, Bell, GraduationCap } from 'lucide-react';
 import { useTheme } from '../../lib/theme.js';
 import { Button } from '@student-os/ui';
+import { apiClient } from '../../lib/api-client.js';
 
 interface HeaderProps {
   user?: { name: string; email: string } | null;
+  onNavigate?: (path: string) => void;
 }
 
-export function Header({ user }: HeaderProps) {
+export function Header({ user, onNavigate }: HeaderProps) {
   const { theme, setTheme } = useTheme();
+  const [unreadCount, setUnreadCount] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!user) return;
+    async function checkNotifications() {
+      try {
+        const res = await apiClient<{ unreadCount: number }>('/api/notifications?unread=true');
+        if (res.success && res.data) {
+          setUnreadCount(res.data.unreadCount);
+        }
+      } catch {
+        // Ignore unread count failure in header
+      }
+    }
+    checkNotifications();
+    const interval = setInterval(checkNotifications, 60000); // refresh every minute
+    return () => clearInterval(interval);
+  }, [user]);
+
+  const handleNotificationsClick = () => {
+    if (onNavigate) {
+      onNavigate('#notifications');
+    } else {
+      window.location.hash = '#notifications';
+    }
+  };
 
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 sm:px-6">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.location.hash = '#home'}>
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm">
           <GraduationCap className="h-5 w-5" />
         </div>
@@ -30,10 +59,15 @@ export function Header({ user }: HeaderProps) {
           variant="ghost"
           size="icon"
           aria-label="Notifications"
+          onClick={handleNotificationsClick}
           className="relative text-slate-600 dark:text-slate-300"
         >
           <Bell className="h-5 w-5" />
-          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-blue-600 ring-2 ring-white dark:ring-slate-900" />
+          {unreadCount > 0 ? (
+            <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-600 px-1 text-[10px] font-bold text-white ring-2 ring-white dark:ring-slate-900">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          ) : null}
         </Button>
 
         <Button

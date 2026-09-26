@@ -76,8 +76,8 @@ export function Sidebar({ currentPath = '#home', onNavigate }: SidebarProps) {
 
       <div className="border-t border-slate-200 p-4 dark:border-slate-800">
         <div className="rounded-lg bg-slate-50 p-3 text-xs text-slate-500 dark:bg-slate-800/50 dark:text-slate-400">
-          <p className="font-semibold text-slate-700 dark:text-slate-300">Phase 0: Foundation</p>
-          <p className="mt-0.5">Platform ready for Phase 1 modules.</p>
+          <p className="font-semibold text-slate-700 dark:text-slate-300">Phase 2: Productivity</p>
+          <p className="mt-0.5">Tasks, Calendar & Notifications active.</p>
         </div>
       </div>
     </aside>

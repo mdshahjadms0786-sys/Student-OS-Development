@@ -14,6 +14,12 @@ import { profileRouter } from './modules/profile/profile.router.js';
 import { subjectsRouter } from './modules/subjects/subjects.router.js';
 import { timetableRouter } from './modules/timetable/timetable.router.js';
 import { dashboardRouter } from './modules/dashboard/dashboard.router.js';
+import { tasksRouter } from './modules/tasks/tasks.router.js';
+import { calendarRouter } from './modules/calendar/calendar.router.js';
+import {
+  notificationsRouter,
+  notificationPreferencesRouter,
+} from './modules/notifications/notifications.router.js';
 
 export function createApp(): Express {
   const app = express();
@@ -78,6 +84,10 @@ export function createApp(): Express {
   app.use('/api/subjects', subjectsRouter);
   app.use('/api/timetable', timetableRouter);
   app.use('/api/dashboard', dashboardRouter);
+  app.use('/api/tasks', tasksRouter);
+  app.use('/api/calendar', calendarRouter);
+  app.use('/api/notifications', notificationsRouter);
+  app.use('/api/notification-preferences', notificationPreferencesRouter);
 
   // Error Handling
   app.use(notFoundHandler);

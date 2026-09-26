@@ -573,6 +573,8 @@ Recommended pipeline:
 - **File Storage**: Local filesystem adapter for development, cloud-ready (S3/Cloudflare R2) - *Confirmed by User*
 - **Testing**: Vitest (Unit/Integration) and Playwright (E2E) - *Confirmed by User*
 - **Timetable Overlap Policy**: Overlapping timetable entries are rejected with 409 Conflict status - *Implemented in Phase 1*
+- **Task & Calendar Model**: Tasks are modeled with due dates, priorities, categories, and completion tracking; Calendar dynamically projects recurring classes, events, and tasks across date ranges - *Implemented in Phase 2*
+- **Notification Model**: In-app notifications with user-configurable preferences per category and lead timing - *Implemented in Phase 2*
 
 ## Remaining Decisions For Later Phases
 
@@ -581,4 +583,4 @@ Recommended pipeline:
 
 ## Immediate Next Step
 
-Phase 1 is complete and fully verified. Awaiting user review and authorization to proceed to **Phase 2 — Productivity** (Tasks, Calendar, Unified Timeline, Notification foundations).
+Phase 2 (Productivity Layer — Tasks, Calendar, Notifications, Notification Preferences, Home & Today cross-module integration) is complete and fully verified. Awaiting user review and authorization to proceed to **Phase 3 — Academic Tracking** (Attendance, Exams, Notes, Analytics).
