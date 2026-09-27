@@ -1,25 +1,29 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import morgan from 'morgan';
-import cookieParser from 'cookie-parser';
-import session from 'express-session';
-import rateLimit from 'express-rate-limit';
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import morgan from "morgan";
+import cookieParser from "cookie-parser";
+import session from "express-session";
+import rateLimit from "express-rate-limit";
 
-import { env } from './config/env.js';
-import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
-import { healthRouter } from './modules/health/health.router.js';
-import { authRouter } from './modules/auth/auth.router.js';
-import { profileRouter } from './modules/profile/profile.router.js';
-import { subjectsRouter } from './modules/subjects/subjects.router.js';
-import { timetableRouter } from './modules/timetable/timetable.router.js';
-import { dashboardRouter } from './modules/dashboard/dashboard.router.js';
-import { tasksRouter } from './modules/tasks/tasks.router.js';
-import { calendarRouter } from './modules/calendar/calendar.router.js';
+import { env } from "./config/env.js";
+import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
+import { healthRouter } from "./modules/health/health.router.js";
+import { authRouter } from "./modules/auth/auth.router.js";
+import { profileRouter } from "./modules/profile/profile.router.js";
+import { subjectsRouter } from "./modules/subjects/subjects.router.js";
+import { timetableRouter } from "./modules/timetable/timetable.router.js";
+import { dashboardRouter } from "./modules/dashboard/dashboard.router.js";
+import { tasksRouter } from "./modules/tasks/tasks.router.js";
+import { calendarRouter } from "./modules/calendar/calendar.router.js";
 import {
   notificationsRouter,
   notificationPreferencesRouter,
-} from './modules/notifications/notifications.router.js';
+} from "./modules/notifications/notifications.router.js";
+import { attendanceRouter } from "./modules/attendance/attendance.router.js";
+import { examsRouter } from "./modules/exams/exams.router.js";
+import { notesRouter } from "./modules/notes/notes.router.js";
+import { analyticsRouter } from "./modules/analytics/analytics.router.js";
 
 export function createApp() {
   const app = express();
@@ -30,37 +34,41 @@ export function createApp() {
   // CORS configuration
   app.use(
     cors({
-      origin: [env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:3000'],
+      origin: [
+        env.CLIENT_URL,
+        "http://localhost:5173",
+        "http://localhost:3000",
+      ],
       credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
-    })
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    }),
   );
 
   // Request logging
-  if (env.NODE_ENV !== 'test') {
-    app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+  if (env.NODE_ENV !== "test") {
+    app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev"));
   }
 
   // Body and cookie parsing
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  app.use(express.json({ limit: "10mb" }));
+  app.use(express.urlencoded({ extended: true, limit: "10mb" }));
   app.use(cookieParser());
 
   // Session configuration with secure httpOnly cookie
   app.use(
     session({
-      name: 'student_os_sid',
+      name: "student_os_sid",
       secret: env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
-        secure: env.NODE_ENV === 'production',
-        sameSite: env.NODE_ENV === 'production' ? 'strict' : 'lax',
+        secure: env.NODE_ENV === "production",
+        sameSite: env.NODE_ENV === "production" ? "strict" : "lax",
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       },
-    })
+    }),
   );
 
   // Rate limiter for API routes
@@ -71,41 +79,49 @@ export function createApp() {
     legacyHeaders: false,
     message: {
       success: false,
-      message: 'Too many requests, please try again later.',
+      message: "Too many requests, please try again later.",
     },
   });
 
-  app.use('/api', apiLimiter);
+  app.use("/api", apiLimiter);
 
   // Root endpoint info
-  app.get('/', (_req, res) => {
+  app.get("/", (_req, res) => {
     res.status(200).json({
       success: true,
-      message: 'Student OS API Server is running',
-      version: '0.1.0',
-      clientUrl: env.CLIENT_URL || 'http://localhost:5173',
+      message: "Student OS API Server is running",
+      version: "0.1.0",
+      clientUrl: env.CLIENT_URL || "http://localhost:5173",
       endpoints: {
-        health: '/api/health',
-        auth: '/api/auth',
-        dashboard: '/api/dashboard',
-        tasks: '/api/tasks',
-        calendar: '/api/calendar',
-        notifications: '/api/notifications',
+        health: "/api/health",
+        auth: "/api/auth",
+        dashboard: "/api/dashboard",
+        tasks: "/api/tasks",
+        calendar: "/api/calendar",
+        notifications: "/api/notifications",
+        attendance: "/api/attendance",
+        exams: "/api/exams",
+        notes: "/api/notes",
+        analytics: "/api/analytics",
       },
     });
   });
 
   // API Routes
-  app.use('/api', healthRouter);
-  app.use('/api/auth', authRouter);
-  app.use('/api/profile', profileRouter);
-  app.use('/api/subjects', subjectsRouter);
-  app.use('/api/timetable', timetableRouter);
-  app.use('/api/dashboard', dashboardRouter);
-  app.use('/api/tasks', tasksRouter);
-  app.use('/api/calendar', calendarRouter);
-  app.use('/api/notifications', notificationsRouter);
-  app.use('/api/notification-preferences', notificationPreferencesRouter);
+  app.use("/api", healthRouter);
+  app.use("/api/auth", authRouter);
+  app.use("/api/profile", profileRouter);
+  app.use("/api/subjects", subjectsRouter);
+  app.use("/api/timetable", timetableRouter);
+  app.use("/api/dashboard", dashboardRouter);
+  app.use("/api/tasks", tasksRouter);
+  app.use("/api/calendar", calendarRouter);
+  app.use("/api/notifications", notificationsRouter);
+  app.use("/api/notification-preferences", notificationPreferencesRouter);
+  app.use("/api/attendance", attendanceRouter);
+  app.use("/api/exams", examsRouter);
+  app.use("/api/notes", notesRouter);
+  app.use("/api/analytics", analyticsRouter);
 
   // Error Handling
   app.use(notFoundHandler);
