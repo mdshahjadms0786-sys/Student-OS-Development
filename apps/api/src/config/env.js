@@ -13,6 +13,8 @@ const EnvSchema = z.object({
   STORAGE_DRIVER: z.enum(['local', 's3', 'r2']).default('local'),
   STORAGE_LOCAL_PATH: z.string().default('./uploads'),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+  AI_PROVIDER: z.enum(['mock', 'openai', 'anthropic', 'gemini']).default('mock'),
+  AI_API_KEY: z.string().optional(),
 });
 
 export const env = EnvSchema.parse(process.env);

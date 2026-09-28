@@ -229,6 +229,17 @@ export function HomePage() {
             </CardHeader>
             <CardContent className="space-y-2">
               <Button
+                variant="default"
+                className="w-full justify-between bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700"
+                onClick={() => navigate("#ai")}
+              >
+                <span className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-amber-300" />
+                  AI Study Assistant & Roadmap
+                </span>
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+              <Button
                 variant="outline"
                 className="w-full justify-between"
                 onClick={() => navigate("#attendance")}
@@ -262,13 +273,6 @@ export function HomePage() {
                 onClick={() => navigate("#tasks")}
               >
                 Tasks & Assignments <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-between"
-                onClick={() => navigate("#calendar")}
-              >
-                Academic Calendar <ArrowRight className="h-4 w-4" />
               </Button>
             </CardContent>
           </Card>

@@ -11,6 +11,7 @@ import {
   Settings,
   BookOpen,
   BarChart3,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@student-os/ui";
 
@@ -25,6 +26,7 @@ const mainNavItems = [
   { name: "Exams", href: "#exams", icon: Award },
   { name: "Notes", href: "#notes", icon: FileText },
   { name: "Analytics", href: "#analytics", icon: BarChart3 },
+  { name: "AI Assistant", href: "#ai", icon: Sparkles },
   { name: "Notifications", href: "#notifications", icon: Bell },
   { name: "Settings", href: "#settings", icon: Settings },
 ];
@@ -75,11 +77,12 @@ export function Sidebar({ currentPath = "#home", onNavigate }) {
       <div className="border-t border-slate-200 p-4 dark:border-slate-800">
         <div className="rounded-lg bg-slate-50 p-3 text-xs text-slate-500 dark:bg-slate-800/50 dark:text-slate-400">
           <p className="font-semibold text-slate-700 dark:text-slate-300">
-            Phase 3: Academic Tracking
+            Phase 4: Intelligence
           </p>
-          <p className="mt-0.5">Attendance, Exams, Notes & Analytics active.</p>
+          <p className="mt-0.5">AI Planner, Doubt Assistant & Smart Advice active.</p>
         </div>
       </div>
     </aside>
   );
 }
+

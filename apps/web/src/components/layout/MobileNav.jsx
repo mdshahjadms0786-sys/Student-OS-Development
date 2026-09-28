@@ -13,6 +13,7 @@ import {
   BookOpen,
   Bell,
   Settings,
+  Sparkles,
   X,
 } from "lucide-react";
 import { cn } from "@student-os/ui";
@@ -25,6 +26,7 @@ const primaryItems = [
 ];
 
 const secondaryItems = [
+  { name: "AI Assistant", href: "#ai", icon: Sparkles },
   { name: "Attendance", href: "#attendance", icon: UserCheck },
   { name: "Exams", href: "#exams", icon: Award },
   { name: "Notes", href: "#notes", icon: FileText },

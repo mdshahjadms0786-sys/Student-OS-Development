@@ -11,3 +11,5 @@ export * from "./attendance.schema.js";
 export * from "./exam.schema.js";
 export * from "./note.schema.js";
 export * from "./analytics.schema.js";
+export * from "./ai.schema.js";
+

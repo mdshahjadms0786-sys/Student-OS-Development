@@ -24,6 +24,8 @@ import { attendanceRouter } from "./modules/attendance/attendance.router.js";
 import { examsRouter } from "./modules/exams/exams.router.js";
 import { notesRouter } from "./modules/notes/notes.router.js";
 import { analyticsRouter } from "./modules/analytics/analytics.router.js";
+import { aiRouter } from "./modules/ai/ai.router.js";
+
 
 export function createApp() {
   const app = express();
@@ -103,6 +105,7 @@ export function createApp() {
         exams: "/api/exams",
         notes: "/api/notes",
         analytics: "/api/analytics",
+        ai: "/api/ai",
       },
     });
   });
@@ -122,6 +125,8 @@ export function createApp() {
   app.use("/api/exams", examsRouter);
   app.use("/api/notes", notesRouter);
   app.use("/api/analytics", analyticsRouter);
+  app.use("/api/ai", aiRouter);
+
 
   // Error Handling
   app.use(notFoundHandler);

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { RegisterRequestSchema, LoginRequestSchema } from './auth.schema.js';
+import { StudyPlanRequestSchema, DoubtAssistantRequestSchema } from './ai.schema.js';
 
 describe('Contracts Schema Validation', () => {
   it('validates a valid registration payload', () => {
@@ -29,5 +30,13 @@ describe('Contracts Schema Validation', () => {
     };
     const result = LoginRequestSchema.safeParse(validData);
     expect(result.success).toBe(true);
+  });
+
+  it('validates AI study plan and doubt request payloads', () => {
+    const planResult = StudyPlanRequestSchema.safeParse({ studyHoursPerDay: 4, days: 7 });
+    expect(planResult.success).toBe(true);
+
+    const doubtResult = DoubtAssistantRequestSchema.safeParse({ question: 'How do binary trees work?' });
+    expect(doubtResult.success).toBe(true);
   });
 });
