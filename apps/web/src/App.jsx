@@ -14,6 +14,7 @@ import { AttendancePage } from "./pages/AttendancePage.jsx";
 import { ExamsPage } from "./pages/ExamsPage.jsx";
 import { NotesPage } from "./pages/NotesPage.jsx";
 import { AnalyticsPage } from "./pages/AnalyticsPage.jsx";
+import { AiPage } from "./pages/AiPage.jsx";
 
 function AppContent() {
   const { currentPath } = useRouter();
@@ -40,6 +41,7 @@ function AppContent() {
       {currentPath === "#exams" && <ExamsPage />}
       {currentPath === "#notes" && <NotesPage />}
       {currentPath === "#analytics" && <AnalyticsPage />}
+      {currentPath === "#ai" && <AiPage />}
       {/* Fallback for unhandled paths */}
       {[
         "#home",
@@ -53,6 +55,7 @@ function AppContent() {
         "#exams",
         "#notes",
         "#analytics",
+        "#ai",
         "#profile",
         "#login",
         "#register",
