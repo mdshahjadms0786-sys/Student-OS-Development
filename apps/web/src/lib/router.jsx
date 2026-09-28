@@ -21,18 +21,28 @@ export function useRouter() {
 
 export function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
-  
-  if (loading) return null; // Or a full page spinner handled higher up
-  
-  if (!user) {
-    window.location.hash = '#login';
-    return null;
-  }
-  
-  if (user && !user.profileComplete && window.location.hash !== '#profile') {
-    window.location.hash = '#profile';
-    return null;
-  }
+
+  const isProfileComplete = React.useMemo(() => {
+    if (!user) return false;
+    return Boolean(
+      user.profileComplete ||
+        (user.profile && (user.profile.program || user.profile.semester))
+    );
+  }, [user]);
+
+  React.useEffect(() => {
+    if (!loading) {
+      if (!user && window.location.hash !== '#login' && window.location.hash !== '#register') {
+        window.location.hash = '#login';
+      } else if (user && !isProfileComplete && window.location.hash !== '#profile') {
+        window.location.hash = '#profile';
+      }
+    }
+  }, [user, loading, isProfileComplete]);
+
+  if (loading) return null;
+  if (!user) return null;
+  if (!isProfileComplete && window.location.hash !== '#profile') return null;
 
   return <>{children}</>;
 }

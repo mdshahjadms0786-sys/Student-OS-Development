@@ -3,6 +3,18 @@ import { apiClient } from './api-client.js';
 
 const AuthContext = React.createContext(undefined);
 
+function formatUser(userData) {
+  if (!userData) return null;
+  const isComplete = Boolean(
+    userData.profileComplete ||
+      (userData.profile && (userData.profile.program || userData.profile.semester))
+  );
+  return {
+    ...userData,
+    profileComplete: isComplete,
+  };
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
@@ -12,7 +24,7 @@ export function AuthProvider({ children }) {
       try {
         const res = await apiClient('/api/auth/me');
         if (res.success && res.data) {
-          setUser(res.data);
+          setUser(formatUser(res.data));
         }
       } catch {
         setUser(null);
@@ -24,7 +36,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = React.useCallback((userData) => {
-    setUser(userData);
+    setUser(formatUser(userData));
   }, []);
 
   const logout = React.useCallback(async () => {
@@ -35,7 +47,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const updateUser = React.useCallback((userData) => {
-    setUser(userData);
+    setUser(formatUser(userData));
   }, []);
 
   return (

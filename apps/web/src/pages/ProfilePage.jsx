@@ -36,7 +36,16 @@ export function ProfilePage() {
       try {
         const res = await apiClient('/api/profile');
         if (res.success && res.data) {
-          reset(res.data);
+          const { profile, name } = res.data;
+          reset({
+            name: name || user?.name || '',
+            program: profile?.program || '',
+            semester: profile?.semester || 1,
+            section: profile?.section || '',
+            batch: profile?.batch || '',
+            academicYear: profile?.academicYear || '',
+            targetAttendance: profile?.targetAttendance ?? 75,
+          });
         }
       } catch {
         toast.error('Could not load profile');
@@ -45,7 +54,7 @@ export function ProfilePage() {
       }
     }
     fetchProfile();
-  }, [reset]);
+  }, [reset, user?.name]);
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -54,10 +63,15 @@ export function ProfilePage() {
         method: 'PATCH',
         body: JSON.stringify(data),
       });
-      if (res.success) {
+      if (res.success && res.data) {
         toast.success('Profile updated successfully');
         if (user) {
-          updateUser({ ...user, name: data.name, profileComplete: true });
+          updateUser({
+            ...user,
+            name: res.data.name || data.name,
+            profile: res.data.profile,
+            profileComplete: true,
+          });
         }
         window.location.hash = '#home';
       }
@@ -88,14 +102,17 @@ export function ProfilePage() {
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
                   <Input id="name" error={!!errors.name} {...register('name')} />
+                  {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="program">Program / Major</Label>
                   <Input id="program" placeholder="e.g. Computer Science" error={!!errors.program} {...register('program')} />
+                  {errors.program && <p className="text-xs text-red-500">{errors.program.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="semester">Semester (1-12)</Label>
                   <Input id="semester" type="number" error={!!errors.semester} {...register('semester', { valueAsNumber: true })} />
+                  {errors.semester && <p className="text-xs text-red-500">{errors.semester.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="section">Section</Label>
