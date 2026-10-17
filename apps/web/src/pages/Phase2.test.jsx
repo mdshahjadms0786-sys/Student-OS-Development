@@ -102,7 +102,7 @@ describe("Phase 2 Frontend Components", () => {
       render(
         <ThemeProvider defaultTheme="light">
           <TasksPage />
-        </ThemeProvider>,
+        </ThemeProvider>
       );
     });
 
@@ -116,12 +116,12 @@ describe("Phase 2 Frontend Components", () => {
       render(
         <ThemeProvider defaultTheme="light">
           <CalendarPage />
-        </ThemeProvider>,
+        </ThemeProvider>
       );
     });
 
     expect(
-      screen.getByRole("heading", { name: /Academic Calendar/i }),
+      screen.getByRole("heading", { name: /Academic Calendar/i })
     ).toBeDefined();
     expect(screen.getByRole("button", { name: /^Today$/i })).toBeDefined();
     expect(screen.getByText("Mon")).toBeDefined();
@@ -132,12 +132,12 @@ describe("Phase 2 Frontend Components", () => {
       render(
         <ThemeProvider defaultTheme="light">
           <NotificationsPage />
-        </ThemeProvider>,
+        </ThemeProvider>
       );
     });
 
     expect(
-      screen.getByRole("heading", { name: /^Notifications$/i }),
+      screen.getByRole("heading", { name: /^Notifications$/i })
     ).toBeDefined();
     expect(screen.getByText("Mock Assignment Due")).toBeDefined();
     expect(screen.getByText("Preferences")).toBeDefined();

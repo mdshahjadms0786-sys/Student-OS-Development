@@ -35,7 +35,7 @@ export class AttendanceService {
       if (target < 100) {
         classesNeeded = Math.max(
           0,
-          Math.ceil((target * total - 100 * attended) / (100 - target)),
+          Math.ceil((target * total - 100 * attended) / (100 - target))
         );
       } else {
         classesNeeded = 1;
@@ -47,7 +47,7 @@ export class AttendanceService {
       if (target > 0) {
         safeAbsences = Math.max(
           0,
-          Math.floor((100 * attended - target * total) / target),
+          Math.floor((100 * attended - target * total) / target)
         );
       }
     }
@@ -94,7 +94,7 @@ export class AttendanceService {
       const absentCount = records.filter((r) => r.status === "ABSENT").length;
       const excusedCount = records.filter((r) => r.status === "EXCUSED").length;
       const cancelledCount = records.filter(
-        (r) => r.status === "CANCELLED",
+        (r) => r.status === "CANCELLED"
       ).length;
 
       const subTotal = presentCount + absentCount;
@@ -129,7 +129,7 @@ export class AttendanceService {
     const overallStats = this.calculateStats(
       totalAttended,
       totalClasses,
-      target,
+      target
     );
 
     return {
@@ -168,7 +168,7 @@ export class AttendanceService {
     const absentCount = records.filter((r) => r.status === "ABSENT").length;
     const excusedCount = records.filter((r) => r.status === "EXCUSED").length;
     const cancelledCount = records.filter(
-      (r) => r.status === "CANCELLED",
+      (r) => r.status === "CANCELLED"
     ).length;
     const total = presentCount + absentCount;
 
@@ -225,14 +225,14 @@ export class AttendanceService {
     try {
       const subjectStats = await this.getSubjectAttendance(
         userId,
-        data.subjectId,
+        data.subjectId
       );
       if (subjectStats.stats.isBelowTarget && subjectStats.stats.hasRecords) {
         await this.notificationsService.createAttendanceWarning(
           userId,
           subject,
           subjectStats.stats.percentage,
-          subjectStats.stats.target,
+          subjectStats.stats.target
         );
       }
     } catch {

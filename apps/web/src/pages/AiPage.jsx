@@ -195,7 +195,7 @@ export function AiPage() {
         body: JSON.stringify({ items: itemsToAccept }),
       });
       setPlanAcceptedSuccess(
-        res.data?.message || "Plan items added to your tasks!",
+        res.data?.message || "Plan items added to your tasks!"
       );
     } catch (err) {
       setErrorMsg(err.message || "Failed to accept plan.");
@@ -322,7 +322,7 @@ export function AiPage() {
                   "flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors",
                   isActive
                     ? "border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400"
-                    : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200",
+                    : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -536,7 +536,7 @@ export function AiPage() {
                                     handleUpdatePlanItem(
                                       idx,
                                       "title",
-                                      e.target.value,
+                                      e.target.value
                                     )
                                   }
                                   className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
@@ -554,7 +554,7 @@ export function AiPage() {
                                     handleUpdatePlanItem(
                                       idx,
                                       "description",
-                                      e.target.value,
+                                      e.target.value
                                     )
                                   }
                                   className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
@@ -571,7 +571,7 @@ export function AiPage() {
                                     handleUpdatePlanItem(
                                       idx,
                                       "subjectId",
-                                      e.target.value || null,
+                                      e.target.value || null
                                     )
                                   }
                                   className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
@@ -599,7 +599,7 @@ export function AiPage() {
                                     handleUpdatePlanItem(
                                       idx,
                                       "durationMinutes",
-                                      Number(e.target.value),
+                                      Number(e.target.value)
                                     )
                                   }
                                   className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
@@ -616,7 +616,7 @@ export function AiPage() {
                                     handleUpdatePlanItem(
                                       idx,
                                       "priority",
-                                      e.target.value,
+                                      e.target.value
                                     )
                                   }
                                   className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
@@ -638,7 +638,7 @@ export function AiPage() {
                                     handleUpdatePlanItem(
                                       idx,
                                       "category",
-                                      e.target.value,
+                                      e.target.value
                                     )
                                   }
                                   className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
@@ -1169,7 +1169,7 @@ export function AiPage() {
                 <RefreshCw
                   className={cn(
                     "h-3.5 w-3.5",
-                    recommendationsLoading && "animate-spin",
+                    recommendationsLoading && "animate-spin"
                   )}
                 />
                 <span>Refresh</span>
@@ -1190,7 +1190,7 @@ export function AiPage() {
                             "rounded px-2 py-0.5 text-xs font-semibold",
                             rec.priority === "HIGH" || rec.priority === "URGENT"
                               ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"
-                              : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
+                              : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
                           )}
                         >
                           {rec.priority} PRIORITY

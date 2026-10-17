@@ -6,7 +6,7 @@ export function Card({ className, ...props }) {
     <div
       className={cn(
         "rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm",
-        className,
+        className
       )}
       {...props}
     />
@@ -27,7 +27,7 @@ export function CardTitle({ className, ...props }) {
     <h3
       className={cn(
         "text-lg font-semibold leading-none tracking-tight text-slate-900 dark:text-white",
-        className,
+        className
       )}
       {...props}
     />

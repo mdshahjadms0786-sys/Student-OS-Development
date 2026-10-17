@@ -45,7 +45,7 @@ export const NotesSummaryRequestSchema = z
     (data) => data.noteId || (data.content && data.content.trim().length > 0),
     {
       message: "Either noteId or non-empty content must be provided",
-    },
+    }
   );
 
 export const ExamPrepRequestSchema = z.object({

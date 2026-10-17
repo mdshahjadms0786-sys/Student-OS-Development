@@ -8,7 +8,7 @@ function formatUser(userData) {
   const isComplete = Boolean(
     userData.profileComplete ||
     (userData.profile &&
-      (userData.profile.program || userData.profile.semester)),
+      (userData.profile.program || userData.profile.semester))
   );
   return {
     ...userData,

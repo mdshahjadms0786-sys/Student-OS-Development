@@ -33,7 +33,7 @@ export function AttendancePage() {
   const [isBatchModalOpen, setIsBatchModalOpen] = React.useState(false);
   const [selectedSubjectId, setSelectedSubjectId] = React.useState("");
   const [recordDate, setRecordDate] = React.useState(
-    format(new Date(), "yyyy-MM-dd"),
+    format(new Date(), "yyyy-MM-dd")
   );
   const [recordStatus, setRecordStatus] = React.useState("PRESENT");
   const [recordRemarks, setRecordRemarks] = React.useState("");
@@ -639,7 +639,7 @@ export function AttendancePage() {
                     value={batchAttended}
                     onChange={(e) =>
                       setBatchAttended(
-                        Math.max(0, parseInt(e.target.value) || 0),
+                        Math.max(0, parseInt(e.target.value) || 0)
                       )
                     }
                     className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"

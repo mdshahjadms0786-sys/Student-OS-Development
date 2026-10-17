@@ -140,13 +140,13 @@ export class AnalyticsService {
         ([priority, count]) => ({
           priority,
           count,
-        }),
+        })
       ),
       categoryDistribution: Object.entries(categoryCounts).map(
         ([category, count]) => ({
           category,
           count,
-        }),
+        })
       ),
     };
   }
@@ -160,7 +160,7 @@ export class AnalyticsService {
       0,
       0,
       0,
-      0,
+      0
     );
 
     const sessions = await prisma.studySession.findMany({
@@ -224,7 +224,7 @@ export class AnalyticsService {
           name,
           hours: Number((mins / 60).toFixed(1)),
           minutes: mins,
-        }),
+        })
       ),
     };
   }
@@ -266,7 +266,7 @@ export class AnalyticsService {
 
       const daysRemaining = Math.ceil(
         (new Date(exam.examAt).getTime() - new Date().getTime()) /
-          (1000 * 60 * 60 * 24),
+          (1000 * 60 * 60 * 24)
       );
 
       return {

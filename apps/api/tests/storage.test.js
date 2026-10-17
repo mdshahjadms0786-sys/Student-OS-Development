@@ -27,7 +27,7 @@ describe("LocalStorageAdapter", () => {
         mimeType: "text/plain",
         size: fileContent.length,
       },
-      "notes",
+      "notes"
     );
 
     expect(uploadResult.storageKey).toContain("notes/");

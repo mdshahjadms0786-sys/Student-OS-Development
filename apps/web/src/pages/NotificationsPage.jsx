@@ -74,8 +74,8 @@ export function NotificationsPage() {
       if (res.success) {
         setNotifications((prev) =>
           prev.map((n) =>
-            n.id === id ? { ...n, readAt: new Date().toISOString() } : n,
-          ),
+            n.id === id ? { ...n, readAt: new Date().toISOString() } : n
+          )
         );
         setUnreadCount((c) => Math.max(0, c - 1));
       }
@@ -92,7 +92,7 @@ export function NotificationsPage() {
       if (res.success) {
         toast.success("All notifications marked as read");
         setNotifications((prev) =>
-          prev.map((n) => ({ ...n, readAt: new Date().toISOString() })),
+          prev.map((n) => ({ ...n, readAt: new Date().toISOString() }))
         );
         setUnreadCount(0);
       }
@@ -113,10 +113,10 @@ export function NotificationsPage() {
       });
       if (res.success && res.data) {
         setPreferences((prev) =>
-          prev.map((p) => (p.type === pref.type ? res.data : p)),
+          prev.map((p) => (p.type === pref.type ? res.data : p))
         );
         toast.success(
-          `${pref.type} notifications ${newEnabled ? "enabled" : "disabled"}`,
+          `${pref.type} notifications ${newEnabled ? "enabled" : "disabled"}`
         );
       }
     } catch {
@@ -135,7 +135,7 @@ export function NotificationsPage() {
       });
       if (res.success && res.data) {
         setPreferences((prev) =>
-          prev.map((p) => (p.type === pref.type ? res.data : p)),
+          prev.map((p) => (p.type === pref.type ? res.data : p))
         );
         toast.success(`Timing updated for ${pref.type}`);
       }
@@ -376,7 +376,7 @@ export function NotificationsPage() {
                         <span>
                           {format(
                             parseISO(notif.createdAt),
-                            "MMM d, yyyy h:mm a",
+                            "MMM d, yyyy h:mm a"
                           )}
                         </span>
 

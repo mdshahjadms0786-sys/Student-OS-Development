@@ -315,7 +315,7 @@ export function AnalyticsPage() {
                         <PieChart>
                           <Pie
                             data={taskData.statusDistribution.filter(
-                              (s) => s.value > 0,
+                              (s) => s.value > 0
                             )}
                             cx="50%"
                             cy="50%"

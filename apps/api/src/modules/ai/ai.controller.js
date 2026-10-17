@@ -40,7 +40,7 @@ export async function handleAcceptStudyPlan(req, res, next) {
 
     const result = await aiService.acceptStudyPlan(
       userId,
-      parseResult.data.items,
+      parseResult.data.items
     );
     res.status(201).json({ success: true, data: result });
   } catch (err) {
@@ -94,7 +94,7 @@ export async function handleExamPrep(req, res, next) {
 
     const prep = await aiService.generateExamPrep(
       userId,
-      parseResult.data.examId,
+      parseResult.data.examId
     );
     res.status(200).json({ success: true, data: prep });
   } catch (err) {

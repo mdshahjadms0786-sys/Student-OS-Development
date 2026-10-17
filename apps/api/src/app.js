@@ -43,7 +43,7 @@ export function createApp() {
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
-    }),
+    })
   );
 
   // Request logging
@@ -69,7 +69,7 @@ export function createApp() {
         sameSite: env.NODE_ENV === "production" ? "strict" : "lax",
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       },
-    }),
+    })
   );
 
   // Rate limiter for API routes

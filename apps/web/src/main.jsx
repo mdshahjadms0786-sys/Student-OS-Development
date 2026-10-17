@@ -14,6 +14,6 @@ if (rootElement) {
         <App />
         <Toaster />
       </ThemeProvider>
-    </React.StrictMode>,
+    </React.StrictMode>
   );
 }

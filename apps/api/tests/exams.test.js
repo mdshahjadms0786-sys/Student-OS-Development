@@ -11,7 +11,7 @@ describe("Exams API", () => {
   let subjectId;
   let examId;
   const futureExamDate = new Date(
-    Date.now() + 5 * 24 * 60 * 60 * 1000,
+    Date.now() + 5 * 24 * 60 * 60 * 1000
   ).toISOString();
 
   beforeAll(async () => {
@@ -118,7 +118,7 @@ describe("Exams API", () => {
     expect(dashRes.body.data.upcomingExams).toBeDefined();
     expect(dashRes.body.data.upcomingExams.length).toBeGreaterThan(0);
     expect(dashRes.body.data.upcomingExams[0].title).toBe(
-      "Midterm Examination",
+      "Midterm Examination"
     );
     expect(dashRes.body.data.upcomingExams[0].daysRemaining).toBeGreaterThan(0);
   });

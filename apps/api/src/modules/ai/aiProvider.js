@@ -16,13 +16,13 @@ export class AiProviderService {
    */
   async withTimeout(
     operation,
-    fallbackReason = "AI service request timed out.",
+    fallbackReason = "AI service request timed out."
   ) {
     let timer;
     const timeoutPromise = new Promise((_, reject) => {
       timer = setTimeout(
         () => reject(new Error(fallbackReason)),
-        this.timeoutMs,
+        this.timeoutMs
       );
     });
 

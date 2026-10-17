@@ -37,8 +37,8 @@ const upload = multer({
       cb(
         new AppError(
           `Unsupported file type: ${file.mimetype}. Allowed types: PDF, PNG, JPG, WEBP, GIF, TXT, MD, DOC, DOCX`,
-          400,
-        ),
+          400
+        )
       );
     }
   },
@@ -95,7 +95,7 @@ notesRouter.patch("/:id", async (req, res, next) => {
     const data = await notesService.updateNote(
       req.params.id,
       req.user.id,
-      validated,
+      validated
     );
     res.status(200).json({
       success: true,
@@ -130,13 +130,13 @@ notesRouter.post(
       if (!req.file) {
         throw new AppError(
           "No file uploaded. Please provide a file with field name 'file'.",
-          400,
+          400
         );
       }
       const data = await notesService.addAttachment(
         req.params.id,
         req.user.id,
-        req.file,
+        req.file
       );
       res.status(201).json({
         success: true,
@@ -146,7 +146,7 @@ notesRouter.post(
     } catch (error) {
       next(error);
     }
-  },
+  }
 );
 
 // GET /api/notes/:id/attachments/:attachmentId/download - download attachment
@@ -157,23 +157,23 @@ notesRouter.get(
       const { buffer, attachment } = await notesService.getAttachmentFile(
         req.params.id,
         req.params.attachmentId,
-        req.user.id,
+        req.user.id
       );
 
       res.setHeader(
         "Content-Type",
-        attachment.mimeType || "application/octet-stream",
+        attachment.mimeType || "application/octet-stream"
       );
       res.setHeader(
         "Content-Disposition",
-        `inline; filename="${encodeURIComponent(attachment.filename)}"`,
+        `inline; filename="${encodeURIComponent(attachment.filename)}"`
       );
       res.setHeader("Content-Length", buffer.length);
       res.send(buffer);
     } catch (error) {
       next(error);
     }
-  },
+  }
 );
 
 // DELETE /api/notes/:id/attachments/:attachmentId - delete attachment
@@ -182,7 +182,7 @@ notesRouter.delete("/:id/attachments/:attachmentId", async (req, res, next) => {
     const data = await notesService.deleteAttachment(
       req.params.id,
       req.params.attachmentId,
-      req.user.id,
+      req.user.id
     );
     res.status(200).json({
       success: true,

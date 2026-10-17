@@ -35,7 +35,7 @@ export function Dialog({
       <div
         className={cn(
           "relative w-full max-w-lg rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900",
-          className,
+          className
         )}
         role="dialog"
         aria-modal="true"

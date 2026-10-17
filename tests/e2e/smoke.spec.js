@@ -12,7 +12,7 @@ test.describe("Student OS Smoke Tests", () => {
     // Verify redirect to login and presence of auth form
     await expect(page.getByText("Welcome back")).toBeVisible();
     await expect(
-      page.getByText("Enter your credentials to login to Student OS"),
+      page.getByText("Enter your credentials to login to Student OS")
     ).toBeVisible();
     await expect(page.getByLabel(/Email/i)).toBeVisible();
     await expect(page.getByLabel(/Password/i)).toBeVisible();

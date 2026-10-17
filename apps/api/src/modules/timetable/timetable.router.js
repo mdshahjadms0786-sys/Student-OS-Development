@@ -58,7 +58,7 @@ timetableRouter.patch("/:id", requireAuth, async (req, res, next) => {
     const entry = await timetableService.updateEntry(
       req.params.id,
       userId,
-      data,
+      data
     );
     res.json({ success: true, data: entry });
   } catch (error) {

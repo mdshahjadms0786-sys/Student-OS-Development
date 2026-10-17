@@ -15,7 +15,7 @@ describe("Web App Layout & Auth Views", () => {
       render(
         <ThemeProvider defaultTheme="light">
           <App />
-        </ThemeProvider>,
+        </ThemeProvider>
       );
     });
 
@@ -30,13 +30,13 @@ describe("Web App Layout & Auth Views", () => {
       render(
         <ThemeProvider defaultTheme="light">
           <App />
-        </ThemeProvider>,
+        </ThemeProvider>
       );
     });
 
     expect(screen.getByText("Create an account")).toBeDefined();
     expect(
-      screen.getByText("Sign up to get started with Student OS"),
+      screen.getByText("Sign up to get started with Student OS")
     ).toBeDefined();
   });
 });

@@ -215,7 +215,7 @@ export class AiService {
       const total = sub.attendanceRecords.length;
       if (total > 0) {
         const attended = sub.attendanceRecords.filter(
-          (r) => r.status === "PRESENT" || r.status === "EXCUSED",
+          (r) => r.status === "PRESENT" || r.status === "EXCUSED"
         ).length;
         const percentage = Math.round((attended / total) * 100);
         if (percentage < targetAttendance) {
@@ -263,7 +263,7 @@ export class AiService {
 
     const studyMinutes = studySessions.reduce(
       (acc, s) => acc + (s.durationMinutes || 0),
-      0,
+      0
     );
     const studyHoursThisWeek = Math.round(studyMinutes / 60);
 

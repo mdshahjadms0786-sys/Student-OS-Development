@@ -424,7 +424,7 @@ export function HomePage() {
                           <span>
                             {format(
                               parseISO(exam.examAt),
-                              "EEE, MMM d • h:mm a",
+                              "EEE, MMM d • h:mm a"
                             )}
                           </span>
                           {exam.room && <span>• Room: {exam.room}</span>}

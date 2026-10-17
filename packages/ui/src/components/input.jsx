@@ -11,13 +11,13 @@ export const Input = React.forwardRef(
           error
             ? "border-red-500 focus-visible:ring-red-500"
             : "border-slate-300 dark:border-slate-700 focus-visible:ring-blue-500",
-          className,
+          className
         )}
         ref={ref}
         {...props}
       />
     );
-  },
+  }
 );
 
 Input.displayName = "Input";

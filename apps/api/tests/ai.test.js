@@ -115,15 +115,15 @@ describe("AI Intelligence API (Phase 4)", () => {
     expect(res.body.success).toBe(true);
     expect(res.body.data.acceptedCount).toBe(1);
     expect(res.body.data.tasks[0].title).toBe(
-      "AI Study Task: Graph Traversal Review",
+      "AI Study Task: Graph Traversal Review"
     );
 
     // Verify task is now present in user's task list
     const tasksRes = await request(app).get("/api/tasks").set("Cookie", cookie);
     expect(
       tasksRes.body.data.some(
-        (t) => t.title === "AI Study Task: Graph Traversal Review",
-      ),
+        (t) => t.title === "AI Study Task: Graph Traversal Review"
+      )
     ).toBe(true);
   });
 

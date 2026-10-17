@@ -33,17 +33,17 @@ test.describe("Phase 2 Productivity Workflows", () => {
     await expect(
       page.getByRole("heading", {
         name: /(Welcome back|Good morning|Good afternoon|Good evening)/i,
-      }),
+      })
     ).toBeVisible();
     await expect(page.getByText("Today's Classes")).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Pending Tasks" }),
+      page.getByRole("heading", { name: "Pending Tasks" })
     ).toBeVisible();
 
     // 4. Navigate to Tasks page
     await page.goto("/#tasks");
     await expect(
-      page.getByRole("heading", { name: /Tasks & Assignments/i }),
+      page.getByRole("heading", { name: /Tasks & Assignments/i })
     ).toBeVisible();
 
     // 5. Create a new task
@@ -60,7 +60,7 @@ test.describe("Phase 2 Productivity Workflows", () => {
 
     // Verify task is visible in task list
     await expect(
-      page.getByText("Algorithms Dynamic Programming Assignment"),
+      page.getByText("Algorithms Dynamic Programming Assignment")
     ).toBeVisible();
 
     // 6. Toggle task complete
@@ -70,7 +70,7 @@ test.describe("Phase 2 Productivity Workflows", () => {
     // 7. Navigate to Calendar
     await page.goto("/#calendar");
     await expect(
-      page.getByRole("heading", { name: /Academic Calendar/i }),
+      page.getByRole("heading", { name: /Academic Calendar/i })
     ).toBeVisible();
     await expect(page.getByText("Mon")).toBeVisible();
     await expect(page.getByText("Sun")).toBeVisible();
@@ -78,10 +78,10 @@ test.describe("Phase 2 Productivity Workflows", () => {
     // 8. Navigate to Notifications
     await page.goto("/#notifications");
     await expect(
-      page.getByRole("heading", { name: /^Notifications$/i }),
+      page.getByRole("heading", { name: /^Notifications$/i })
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /Preferences/i }),
+      page.getByRole("button", { name: /Preferences/i })
     ).toBeVisible();
 
     // Open preferences and toggle
@@ -91,7 +91,7 @@ test.describe("Phase 2 Productivity Workflows", () => {
     // 9. Return to Home and verify integration
     await page.goto("/#home");
     await expect(
-      page.getByRole("heading", { name: "Pending Tasks" }),
+      page.getByRole("heading", { name: "Pending Tasks" })
     ).toBeVisible();
   });
 });

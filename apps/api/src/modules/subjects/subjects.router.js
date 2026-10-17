@@ -47,7 +47,7 @@ subjectsRouter.patch("/:id", requireAuth, async (req, res, next) => {
     const subject = await subjectsService.updateSubject(
       req.params.id,
       userId,
-      data,
+      data
     );
     res.json({ success: true, data: subject });
   } catch (error) {

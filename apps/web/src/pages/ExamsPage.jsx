@@ -117,7 +117,7 @@ export function ExamsPage() {
     }
 
     const isoDateTime = new Date(
-      `${examDate}T${examTime || "09:00"}:00`,
+      `${examDate}T${examTime || "09:00"}:00`
     ).toISOString();
 
     setSaving(true);
@@ -182,7 +182,7 @@ export function ExamsPage() {
   const handleQuickProgress = async (exam, delta) => {
     const nextVal = Math.min(
       100,
-      Math.max(0, exam.preparationProgress + delta),
+      Math.max(0, exam.preparationProgress + delta)
     );
     try {
       const res = await apiClient(`/api/exams/${exam.id}`, {
@@ -192,8 +192,8 @@ export function ExamsPage() {
       if (res.success) {
         setExams((prev) =>
           prev.map((e) =>
-            e.id === exam.id ? { ...e, preparationProgress: nextVal } : e,
-          ),
+            e.id === exam.id ? { ...e, preparationProgress: nextVal } : e
+          )
         );
       }
     } catch {

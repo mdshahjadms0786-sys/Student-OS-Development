@@ -85,7 +85,7 @@ export function MobileNav({ currentPath = "#home", onNavigate }) {
                       "flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl text-xs font-medium transition-colors",
                       isActive
                         ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-                        : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800",
+                        : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
                     )}
                   >
                     <Icon className="h-5 w-5" />
@@ -117,7 +117,7 @@ export function MobileNav({ currentPath = "#home", onNavigate }) {
                 "flex flex-col items-center justify-center gap-1 px-3 py-1 text-xs font-medium transition-colors",
                 isActive
                   ? "text-blue-600 dark:text-blue-400"
-                  : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100",
+                  : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
               )}
             >
               <Icon className="h-5 w-5" />
@@ -133,7 +133,7 @@ export function MobileNav({ currentPath = "#home", onNavigate }) {
             "flex flex-col items-center justify-center gap-1 px-3 py-1 text-xs font-medium transition-colors",
             isMoreOpen || secondaryItems.some((s) => s.href === currentPath)
               ? "text-blue-600 dark:text-blue-400"
-              : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100",
+              : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
           )}
         >
           <MoreHorizontal className="h-5 w-5" />

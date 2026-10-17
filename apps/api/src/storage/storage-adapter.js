@@ -31,7 +31,7 @@ export class LocalStorageAdapter {
       .replace(/[^a-zA-Z0-9.-]/g, "_");
     const storageKey = path.posix.join(
       directory.replace(/\\/g, "/"),
-      `${safeTimestamp}-${cleanFilename}`,
+      `${safeTimestamp}-${cleanFilename}`
     );
     const fullPath = this._resolveSafePath(storageKey);
 
@@ -70,7 +70,7 @@ export function createStorageAdapter(driver, basePath = "./uploads") {
     case "r2":
       // Architecture prepared for cloud storage drivers
       throw new Error(
-        `Storage driver ${driver} requires production S3/R2 configuration`,
+        `Storage driver ${driver} requires production S3/R2 configuration`
       );
     default:
       return new LocalStorageAdapter(basePath);

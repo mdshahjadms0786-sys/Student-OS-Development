@@ -28,7 +28,7 @@ export async function seed() {
   });
 
   console.log(
-    `✅ Demo user established: ${demoStudent.email} (ID: ${demoStudent.id})`,
+    `✅ Demo user established: ${demoStudent.email} (ID: ${demoStudent.id})`
   );
 }
 

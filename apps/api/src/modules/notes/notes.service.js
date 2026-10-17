@@ -5,7 +5,7 @@ import { env } from "../../config/env.js";
 
 const storage = createStorageAdapter(
   env.STORAGE_DRIVER || "local",
-  env.STORAGE_LOCAL_PATH || "./uploads",
+  env.STORAGE_LOCAL_PATH || "./uploads"
 );
 
 function formatAttachment(att, noteId) {
@@ -66,7 +66,7 @@ export class NotesService {
     return notes.map((note) => ({
       ...note,
       attachments: (attachmentsByNoteId.get(note.id) || []).map((att) =>
-        formatAttachment(att, note.id),
+        formatAttachment(att, note.id)
       ),
     }));
   }
@@ -140,7 +140,7 @@ export class NotesService {
     return {
       ...note,
       attachments: createdAttachments.map((att) =>
-        formatAttachment(att, note.id),
+        formatAttachment(att, note.id)
       ),
     };
   }
@@ -263,7 +263,7 @@ export class NotesService {
         size: file.size,
         mimeType: file.mimetype || "application/octet-stream",
       },
-      `notes/${noteId}`,
+      `notes/${noteId}`
     );
 
     const attachment = await prisma.attachment.create({
@@ -337,7 +337,7 @@ export class NotesService {
     ) {
       throw new AppError(
         "Attachment is an external link, not a downloadable file",
-        400,
+        400
       );
     }
 

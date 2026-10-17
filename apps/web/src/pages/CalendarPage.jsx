@@ -192,10 +192,10 @@ export function CalendarPage() {
                       const isTodayDate = isToday(day);
 
                       const classCount = dayItems.filter(
-                        (i) => i.type === "CLASS",
+                        (i) => i.type === "CLASS"
                       ).length;
                       const taskCount = dayItems.filter(
-                        (i) => i.type === "TASK",
+                        (i) => i.type === "TASK"
                       ).length;
 
                       return (
@@ -299,7 +299,7 @@ export function CalendarPage() {
                     {classesForDay.map((item) => {
                       const startTime = format(
                         parseISO(item.startAt),
-                        "h:mm a",
+                        "h:mm a"
                       );
                       const endTime = format(parseISO(item.endAt), "h:mm a");
                       return (

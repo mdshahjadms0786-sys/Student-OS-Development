@@ -30,7 +30,7 @@ attendanceRouter.get("/:subjectId", async (req, res, next) => {
   try {
     const data = await attendanceService.getSubjectAttendance(
       req.user.id,
-      req.params.subjectId,
+      req.params.subjectId
     );
     res.status(200).json({
       success: true,
@@ -47,7 +47,7 @@ attendanceRouter.post("/", async (req, res, next) => {
     const validated = CreateAttendanceRecordSchema.parse(req.body);
     const data = await attendanceService.recordAttendance(
       req.user.id,
-      validated,
+      validated
     );
     res.status(201).json({
       success: true,
@@ -65,7 +65,7 @@ attendanceRouter.post("/batch", async (req, res, next) => {
     const validated = BatchAttendanceSchema.parse(req.body);
     const data = await attendanceService.batchUpdateAttendance(
       req.user.id,
-      validated,
+      validated
     );
     res.status(200).json({
       success: true,
@@ -84,7 +84,7 @@ attendanceRouter.patch("/:id", async (req, res, next) => {
     const data = await attendanceService.updateAttendanceRecord(
       req.params.id,
       req.user.id,
-      validated,
+      validated
     );
     res.status(200).json({
       success: true,
@@ -101,7 +101,7 @@ attendanceRouter.delete("/:id", async (req, res, next) => {
   try {
     const data = await attendanceService.deleteAttendanceRecord(
       req.params.id,
-      req.user.id,
+      req.user.id
     );
     res.status(200).json({
       success: true,

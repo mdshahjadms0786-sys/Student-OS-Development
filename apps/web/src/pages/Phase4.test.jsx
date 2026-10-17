@@ -110,12 +110,12 @@ describe("Phase 4 AI Frontend Components", () => {
       render(
         <ThemeProvider defaultTheme="light">
           <AiPage />
-        </ThemeProvider>,
+        </ThemeProvider>
       );
     });
 
     expect(
-      screen.getByRole("heading", { name: /^AI Intelligence Center$/i }),
+      screen.getByRole("heading", { name: /^AI Intelligence Center$/i })
     ).toBeDefined();
     expect(screen.getByText("Phase 4 Active")).toBeDefined();
     expect(screen.getByText("Study Planner")).toBeDefined();

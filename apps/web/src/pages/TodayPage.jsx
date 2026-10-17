@@ -51,8 +51,8 @@ export function TodayPage() {
       if (timetableRes.success && timetableRes.data) {
         setEntries(
           timetableRes.data.sort((a, b) =>
-            a.startTime.localeCompare(b.startTime),
-          ),
+            a.startTime.localeCompare(b.startTime)
+          )
         );
       }
       if (tasksRes.success && tasksRes.data) {
@@ -61,7 +61,7 @@ export function TodayPage() {
       if (examsRes.success && examsRes.data) {
         const targetDateStr = format(d, "yyyy-MM-dd");
         const dayExams = examsRes.data.filter(
-          (ex) => format(parseISO(ex.examAt), "yyyy-MM-dd") === targetDateStr,
+          (ex) => format(parseISO(ex.examAt), "yyyy-MM-dd") === targetDateStr
         );
         setExams(dayExams);
       }

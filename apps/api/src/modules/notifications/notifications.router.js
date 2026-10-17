@@ -12,7 +12,7 @@ notificationsRouter.get("/", requireAuth, async (req, res, next) => {
     const unreadOnly = req.query.unread === "true";
     const notifications = await notificationsService.listNotifications(
       userId,
-      unreadOnly,
+      unreadOnly
     );
     const unreadCount = await notificationsService.getUnreadCount(userId);
     res.json({ success: true, data: { notifications, unreadCount } });
@@ -26,7 +26,7 @@ notificationsRouter.post("/:id/read", requireAuth, async (req, res, next) => {
     const userId = req.user.id;
     const notification = await notificationsService.markAsRead(
       req.params.id,
-      userId,
+      userId
     );
     res.json({ success: true, data: notification });
   } catch (error) {
@@ -65,11 +65,11 @@ notificationPreferencesRouter.patch(
       const data = UpdateNotificationPreferenceRequestSchema.parse(req.body);
       const preference = await notificationsService.updatePreference(
         userId,
-        data,
+        data
       );
       res.json({ success: true, data: preference });
     } catch (error) {
       next(error);
     }
-  },
+  }
 );

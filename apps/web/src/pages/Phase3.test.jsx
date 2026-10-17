@@ -213,16 +213,16 @@ describe("Phase 3 Frontend Components", () => {
       render(
         <ThemeProvider defaultTheme="light">
           <AttendancePage />
-        </ThemeProvider>,
+        </ThemeProvider>
       );
     });
 
     expect(
-      screen.getByRole("heading", { name: /^Attendance Tracking$/i }),
+      screen.getByRole("heading", { name: /^Attendance Tracking$/i })
     ).toBeDefined();
     expect(screen.getAllByText("80%").length).toBeGreaterThan(0);
     expect(
-      screen.getByText(/24 attended out of 30 total classes/i),
+      screen.getByText(/24 attended out of 30 total classes/i)
     ).toBeDefined();
     expect(screen.getByText("Log Class")).toBeDefined();
     expect(screen.getByText("Batch Sync")).toBeDefined();
@@ -233,12 +233,12 @@ describe("Phase 3 Frontend Components", () => {
       render(
         <ThemeProvider defaultTheme="light">
           <ExamsPage />
-        </ThemeProvider>,
+        </ThemeProvider>
       );
     });
 
     expect(
-      screen.getByRole("heading", { name: /^Exams & Assessments$/i }),
+      screen.getByRole("heading", { name: /^Exams & Assessments$/i })
     ).toBeDefined();
     expect(screen.getByText("Operating Systems Midterm")).toBeDefined();
     expect(screen.getByText("In 5 days")).toBeDefined();
@@ -252,16 +252,16 @@ describe("Phase 3 Frontend Components", () => {
       render(
         <ThemeProvider defaultTheme="light">
           <NotesPage />
-        </ThemeProvider>,
+        </ThemeProvider>
       );
     });
 
     expect(
-      screen.getByRole("heading", { name: /^Subject Notes$/i }),
+      screen.getByRole("heading", { name: /^Subject Notes$/i })
     ).toBeDefined();
     expect(screen.getByText("Processes vs Threads")).toBeDefined();
     expect(
-      screen.getByPlaceholderText(/Search notes by title or content/i),
+      screen.getByPlaceholderText(/Search notes by title or content/i)
     ).toBeDefined();
     expect(screen.getByText("New Note")).toBeDefined();
   });
@@ -271,18 +271,18 @@ describe("Phase 3 Frontend Components", () => {
       render(
         <ThemeProvider defaultTheme="light">
           <AnalyticsPage />
-        </ThemeProvider>,
+        </ThemeProvider>
       );
     });
 
     expect(
-      screen.getByRole("heading", { name: /^Academic Analytics$/i }),
+      screen.getByRole("heading", { name: /^Academic Analytics$/i })
     ).toBeDefined();
     expect(screen.getByText("Subject Attendance vs Target")).toBeDefined();
     expect(screen.getByText("Task Status Distribution")).toBeDefined();
     expect(screen.getByText("Log Study Time")).toBeDefined();
     expect(
-      screen.getByText(/Official marks data not recorded yet/i),
+      screen.getByText(/Official marks data not recorded yet/i)
     ).toBeDefined();
   });
 });

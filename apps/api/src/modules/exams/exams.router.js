@@ -61,7 +61,7 @@ examsRouter.patch("/:id", async (req, res, next) => {
     const data = await examsService.updateExam(
       req.params.id,
       req.user.id,
-      validated,
+      validated
     );
     res.status(200).json({
       success: true,

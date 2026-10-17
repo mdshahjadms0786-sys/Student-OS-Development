@@ -54,7 +54,7 @@ export class CalendarService {
       const jsDay = curr.getDay();
       const dayOfWeek = jsDay === 0 ? 7 : jsDay;
       const dayEntries = timetableEntries.filter(
-        (e) => e.dayOfWeek === dayOfWeek,
+        (e) => e.dayOfWeek === dayOfWeek
       );
 
       const year = curr.getFullYear();
@@ -147,7 +147,7 @@ export class CalendarService {
       ...eventItems,
       ...examItems,
     ].sort(
-      (a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime(),
+      (a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime()
     );
 
     return allItems;

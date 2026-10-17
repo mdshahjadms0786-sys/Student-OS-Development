@@ -67,7 +67,7 @@ describe("Calendar API", () => {
     // 2026-10-12 is Monday, 2026-10-18 is Sunday
     const res = await request(app)
       .get(
-        "/api/calendar?from=2026-10-12T00:00:00.000Z&to=2026-10-18T23:59:59.999Z",
+        "/api/calendar?from=2026-10-12T00:00:00.000Z&to=2026-10-18T23:59:59.999Z"
       )
       .set("Cookie", cookie);
 

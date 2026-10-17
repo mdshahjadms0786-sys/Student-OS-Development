@@ -82,7 +82,7 @@ describe("Attendance API", () => {
 
     // Subject stats should also be zero-safe
     const osSubject = res.body.data.subjects.find(
-      (s) => s.subjectId === subjectId,
+      (s) => s.subjectId === subjectId
     );
     expect(osSubject).toBeDefined();
     expect(osSubject.total).toBe(0);

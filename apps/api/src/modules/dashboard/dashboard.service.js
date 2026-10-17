@@ -87,7 +87,7 @@ export class DashboardService {
       ...exam,
       daysRemaining: Math.ceil(
         (new Date(exam.examAt).getTime() - now.getTime()) /
-          (1000 * 60 * 60 * 24),
+          (1000 * 60 * 60 * 24)
       ),
     }));
 
@@ -96,10 +96,10 @@ export class DashboardService {
       where: { userId },
     });
     const attendedCount = attendanceRecords.filter(
-      (r) => r.status === "PRESENT",
+      (r) => r.status === "PRESENT"
     ).length;
     const absentCount = attendanceRecords.filter(
-      (r) => r.status === "ABSENT",
+      (r) => r.status === "ABSENT"
     ).length;
     const totalAttendanceClasses = attendedCount + absentCount;
     const targetAttendance = user.profile?.targetAttendance ?? 75.0;

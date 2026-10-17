@@ -594,13 +594,13 @@ Recommended pipeline:
 - **Notification Model**: In-app notifications with user-configurable preferences per category and lead timing - _Implemented in Phase 2_
 - **Technology Stack Migration**: Migrated 100% of codebase from TypeScript/Next.js to pure JavaScript (React + Vite + Express + Prisma) while strictly preserving all functionality and passing all unit, build, and E2E tests - _Migrated & Verified_
 - **Audit Findings Remediation (Post Phase 4)**: Resolved all 7 critical and incomplete findings from `audit_report.md` prior to Phase 5:
-  1. *Tracked Vite Config*: Fixed `.gitignore` to track `apps/web/vite.config.js` and ensured clean build from fresh clone.
-  2. *Fixed Profile Onboarding & E2E Tests*: Eliminated React root crash (`Sparkles` import) and prevented asynchronous `fetchProfile` race condition in react-hook-form. 4/4 Playwright tests pass on Desktop Chromium and Mobile Chrome.
-  3. *Versioned Prisma Migrations*: Baselined database with `20261017000000_init` migration; added `db:migrate` (`migrate:deploy`) without database wipe.
-  4. *Secure Notes File Upload API*: Implemented `POST /api/notes/:id/attachments`, `GET /api/notes/:id/attachments/:attachmentId/download`, and `DELETE /api/notes/:id/attachments/:attachmentId` using Multer with path traversal prevention, 10MB ceiling, strict MIME whitelist, and IDOR ownership checks.
-  5. *Shared apiClient in AiPage*: Replaced all 9 raw `fetch()` calls in `AiPage.jsx` with `apiClient`.
-  6. *Inline Study Plan Editing*: Added interactive inline editing (title, duration, priority, category, subject), removal, and custom task creation in AI Study Planner before batch schedule acceptance.
-  7. *Tooling & Code Quality*: Added `eslint.config.js`, `.prettierignore`, root scripts (`lint`, `lint:fix`, `format`, `typecheck`), and formatted workspace with Prettier.
+  1. _Tracked Vite Config_: Fixed `.gitignore` to track `apps/web/vite.config.js` and ensured clean build from fresh clone.
+  2. _Fixed Profile Onboarding & E2E Tests_: Eliminated React root crash (`Sparkles` import) and prevented asynchronous `fetchProfile` race condition in react-hook-form. 4/4 Playwright tests pass on Desktop Chromium and Mobile Chrome.
+  3. _Versioned Prisma Migrations_: Baselined database with `20261017000000_init` migration; added `db:migrate` (`migrate:deploy`) without database wipe.
+  4. _Secure Notes File Upload API_: Implemented `POST /api/notes/:id/attachments`, `GET /api/notes/:id/attachments/:attachmentId/download`, and `DELETE /api/notes/:id/attachments/:attachmentId` using Multer with path traversal prevention, 10MB ceiling, strict MIME whitelist, and IDOR ownership checks.
+  5. _Shared apiClient in AiPage_: Replaced all 9 raw `fetch()` calls in `AiPage.jsx` with `apiClient`.
+  6. _Inline Study Plan Editing_: Added interactive inline editing (title, duration, priority, category, subject), removal, and custom task creation in AI Study Planner before batch schedule acceptance.
+  7. _Tooling & Code Quality_: Added `eslint.config.js`, `.prettierignore`, root scripts (`lint`, `lint:fix`, `format`, `typecheck`), and formatted workspace with Prettier.
 
 ## Remaining Decisions For Later Phases
 
@@ -610,6 +610,7 @@ Recommended pipeline:
 ## Current Status & Next Steps
 
 All 7 audit remediation tasks are completely implemented, verified, and passing:
+
 - **Unit & Integration Tests**: 79/79 passed across all 5 workspace projects (`pnpm test`).
 - **E2E Tests**: 4/4 passed across Desktop Chromium and Mobile Chrome (`pnpm test:e2e`).
 - **Lint & Format**: Clean pass with 0 errors (`pnpm lint`).

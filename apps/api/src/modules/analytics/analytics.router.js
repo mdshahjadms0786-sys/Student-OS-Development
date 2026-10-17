@@ -40,7 +40,7 @@ analyticsRouter.get("/study-hours", async (req, res, next) => {
     const days = req.query.days ? parseInt(req.query.days, 10) : 7;
     const data = await analyticsService.getStudyHoursAnalytics(
       req.user.id,
-      days,
+      days
     );
     res.status(200).json({
       success: true,
@@ -83,7 +83,7 @@ analyticsRouter.get("/exams", async (req, res, next) => {
 analyticsRouter.get("/academic-performance", async (req, res, next) => {
   try {
     const data = await analyticsService.getAcademicPerformanceAnalytics(
-      req.user.id,
+      req.user.id
     );
     res.status(200).json({
       success: true,

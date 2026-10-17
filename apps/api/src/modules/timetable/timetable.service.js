@@ -64,7 +64,7 @@ export class TimetableService {
       userId,
       data.dayOfWeek,
       data.startTime,
-      data.endTime,
+      data.endTime
     );
 
     const entry = await prisma.timetableEntry.create({

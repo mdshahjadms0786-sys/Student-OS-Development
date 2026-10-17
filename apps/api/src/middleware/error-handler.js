@@ -20,7 +20,7 @@ export function notFoundHandler(req, res) {
 export function errorHandler(err, req, res, _next) {
   if (err instanceof ZodError) {
     const errorMessages = err.errors.map(
-      (e) => `${e.path.join(".") || "body"}: ${e.message}`,
+      (e) => `${e.path.join(".") || "body"}: ${e.message}`
     );
     res.status(400).json({
       success: false,
@@ -56,7 +56,7 @@ export function errorHandler(err, req, res, _next) {
 
   console.error(
     `[Unhandled Exception] ${req.method} ${req.originalUrl}:`,
-    error,
+    error
   );
 
   res.status(500).json({

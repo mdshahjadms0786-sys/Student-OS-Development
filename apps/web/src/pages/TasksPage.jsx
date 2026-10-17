@@ -113,7 +113,7 @@ export function TasksPage() {
         ? "COMPLETED"
         : task.status === "IN_PROGRESS"
           ? "IN_PROGRESS"
-          : "TODO",
+          : "TODO"
     );
   };
 
@@ -149,7 +149,7 @@ export function TasksPage() {
         if (res.success && res.data) {
           toast.success("Task updated");
           setTasks((prev) =>
-            prev.map((t) => (t.id === editingTask.id ? res.data : t)),
+            prev.map((t) => (t.id === editingTask.id ? res.data : t))
           );
           setEditingTask(null);
         }
@@ -233,13 +233,13 @@ export function TasksPage() {
   // Calculate metrics
   const totalTasks = tasks.length;
   const inProgressCount = tasks.filter(
-    (t) => t.status === "IN_PROGRESS" || t.status === "TODO",
+    (t) => t.status === "IN_PROGRESS" || t.status === "TODO"
   ).length;
   const completedCount = tasks.filter((t) => t.status === "COMPLETED").length;
   const overdueCount = tasks.filter(
     (t) =>
       (t.status === "TODO" || t.status === "IN_PROGRESS") &&
-      isPast(parseISO(t.dueAt)),
+      isPast(parseISO(t.dueAt))
   ).length;
 
   const priorityColor = (p) => {

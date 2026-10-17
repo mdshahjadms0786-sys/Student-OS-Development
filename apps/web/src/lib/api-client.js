@@ -28,7 +28,7 @@ export async function apiClient(endpoint, options = {}) {
     throw new ApiError(
       data.message || `Request failed with status ${response.status}`,
       response.status,
-      data.errors,
+      data.errors
     );
   }
 

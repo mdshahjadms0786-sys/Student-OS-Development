@@ -3,7 +3,7 @@ import { useAuth } from "./auth-context.jsx";
 
 export function useRouter() {
   const [currentPath, setCurrentPath] = React.useState(
-    () => window.location.hash || "#home",
+    () => window.location.hash || "#home"
   );
 
   React.useEffect(() => {
@@ -28,7 +28,7 @@ export function ProtectedRoute({ children }) {
     if (!user) return false;
     return Boolean(
       user.profileComplete ||
-      (user.profile && (user.profile.program || user.profile.semester)),
+      (user.profile && (user.profile.program || user.profile.semester))
     );
   }, [user]);
 

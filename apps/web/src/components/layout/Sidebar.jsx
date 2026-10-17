@@ -56,7 +56,7 @@ export function Sidebar({ currentPath = "#home", onNavigate }) {
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                   isActive
                     ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-                    : "text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100",
+                    : "text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100"
                 )}
               >
                 <Icon
@@ -64,7 +64,7 @@ export function Sidebar({ currentPath = "#home", onNavigate }) {
                     "h-5 w-5",
                     isActive
                       ? "text-blue-600 dark:text-blue-400"
-                      : "text-slate-400 dark:text-slate-500",
+                      : "text-slate-400 dark:text-slate-500"
                   )}
                 />
                 <span>{item.name}</span>

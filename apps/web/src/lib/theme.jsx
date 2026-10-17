@@ -8,7 +8,7 @@ export function ThemeProvider({
   storageKey = "student_os_theme",
 }) {
   const [theme, setTheme] = React.useState(
-    () => localStorage.getItem(storageKey) || defaultTheme,
+    () => localStorage.getItem(storageKey) || defaultTheme
   );
 
   React.useEffect(() => {

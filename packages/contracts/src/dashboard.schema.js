@@ -10,7 +10,7 @@ export const DashboardSummaryResponseSchema = z.object({
   todayClasses: z.array(
     TimetableEntryResponseSchema.extend({
       subject: SubjectResponseSchema,
-    }),
+    })
   ),
   totalSubjectsCount: z.number(),
   nextClass: TimetableEntryResponseSchema.extend({
