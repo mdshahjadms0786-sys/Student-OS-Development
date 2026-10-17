@@ -10,8 +10,6 @@ coverage
 .env.local
 .env.*.local
 *.tsbuildinfo
-vite.config.js
-vite.config.d.ts
 
 # OS
 .DS_Store
@@ -24,9 +22,9 @@ Thumbs.db
 .idea
 
 # Uploads / Storage
-uploads/
-storage/
-temp/
+/uploads/
+/storage/
+/temp/
 
 # Prisma SQLite dev (if used) or generated files
 *.db

@@ -1,5 +1,25 @@
 import { prisma } from "@student-os/database";
 import { AppError } from "../../middleware/error-handler.js";
+import { createStorageAdapter } from "../../storage/storage-adapter.js";
+import { env } from "../../config/env.js";
+
+const storage = createStorageAdapter(
+  env.STORAGE_DRIVER || "local",
+  env.STORAGE_LOCAL_PATH || "./uploads",
+);
+
+function formatAttachment(att, noteId) {
+  const isUrl =
+    att.storageKey &&
+    (att.storageKey.startsWith("http://") ||
+      att.storageKey.startsWith("https://"));
+  return {
+    ...att,
+    url: isUrl
+      ? att.storageKey
+      : `/api/notes/${noteId}/attachments/${att.id}/download`,
+  };
+}
 
 export class NotesService {
   async listNotes(userId, filters = {}) {
@@ -45,7 +65,9 @@ export class NotesService {
 
     return notes.map((note) => ({
       ...note,
-      attachments: attachmentsByNoteId.get(note.id) || [],
+      attachments: (attachmentsByNoteId.get(note.id) || []).map((att) =>
+        formatAttachment(att, note.id),
+      ),
     }));
   }
 
@@ -73,7 +95,7 @@ export class NotesService {
 
     return {
       ...note,
-      attachments,
+      attachments: attachments.map((att) => formatAttachment(att, id)),
     };
   }
 
@@ -117,7 +139,9 @@ export class NotesService {
 
     return {
       ...note,
-      attachments: createdAttachments,
+      attachments: createdAttachments.map((att) =>
+        formatAttachment(att, note.id),
+      ),
     };
   }
 
@@ -179,7 +203,7 @@ export class NotesService {
 
     return {
       ...note,
-      attachments,
+      attachments: attachments.map((att) => formatAttachment(att, id)),
     };
   }
 
@@ -196,6 +220,24 @@ export class NotesService {
       throw new AppError("Unauthorized", 403);
     }
 
+    const attachments = await prisma.attachment.findMany({
+      where: { entityType: "NOTE", entityId: id, userId },
+    });
+
+    for (const att of attachments) {
+      if (
+        att.storageKey &&
+        !att.storageKey.startsWith("http://") &&
+        !att.storageKey.startsWith("https://")
+      ) {
+        try {
+          await storage.deleteFile(att.storageKey);
+        } catch {
+          // ignore error if file missing
+        }
+      }
+    }
+
     await prisma.attachment.deleteMany({
       where: { entityType: "NOTE", entityId: id, userId },
     });
@@ -205,5 +247,104 @@ export class NotesService {
     });
 
     return { id };
+  }
+
+  async addAttachment(noteId, userId, file) {
+    await this.getNote(noteId, userId);
+
+    if (!file || !file.buffer) {
+      throw new AppError("No file buffer provided for upload", 400);
+    }
+
+    const uploadResult = await storage.uploadFile(
+      {
+        buffer: file.buffer,
+        filename: file.originalname || "attachment",
+        size: file.size,
+        mimeType: file.mimetype || "application/octet-stream",
+      },
+      `notes/${noteId}`,
+    );
+
+    const attachment = await prisma.attachment.create({
+      data: {
+        userId,
+        entityType: "NOTE",
+        entityId: noteId,
+        filename: file.originalname || "attachment",
+        storageKey: uploadResult.storageKey,
+        size: file.size,
+        mimeType: file.mimetype || "application/octet-stream",
+      },
+    });
+
+    return formatAttachment(attachment, noteId);
+  }
+
+  async deleteAttachment(noteId, attachmentId, userId) {
+    await this.getNote(noteId, userId);
+
+    const attachment = await prisma.attachment.findUnique({
+      where: { id: attachmentId },
+    });
+
+    if (
+      !attachment ||
+      attachment.userId !== userId ||
+      attachment.entityId !== noteId
+    ) {
+      throw new AppError("Attachment not found or unauthorized", 404);
+    }
+
+    if (
+      attachment.storageKey &&
+      !attachment.storageKey.startsWith("http://") &&
+      !attachment.storageKey.startsWith("https://")
+    ) {
+      try {
+        await storage.deleteFile(attachment.storageKey);
+      } catch {
+        // ignore
+      }
+    }
+
+    await prisma.attachment.delete({
+      where: { id: attachmentId },
+    });
+
+    return { id: attachmentId };
+  }
+
+  async getAttachmentFile(noteId, attachmentId, userId) {
+    await this.getNote(noteId, userId);
+
+    const attachment = await prisma.attachment.findUnique({
+      where: { id: attachmentId },
+    });
+
+    if (
+      !attachment ||
+      attachment.userId !== userId ||
+      attachment.entityId !== noteId
+    ) {
+      throw new AppError("Attachment not found or unauthorized", 404);
+    }
+
+    if (
+      attachment.storageKey &&
+      (attachment.storageKey.startsWith("http://") ||
+        attachment.storageKey.startsWith("https://"))
+    ) {
+      throw new AppError(
+        "Attachment is an external link, not a downloadable file",
+        400,
+      );
+    }
+
+    const fileBuffer = await storage.getFile(attachment.storageKey);
+    return {
+      buffer: fileBuffer,
+      attachment,
+    };
   }
 }

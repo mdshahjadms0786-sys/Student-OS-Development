@@ -1,13 +1,13 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const NotificationTypeEnum = z.enum([
-  'CLASS',
-  'ASSIGNMENT',
-  'EXAM',
-  'ATTENDANCE',
-  'TASK',
-  'SUMMARY',
-  'SYSTEM',
+  "CLASS",
+  "ASSIGNMENT",
+  "EXAM",
+  "ATTENDANCE",
+  "TASK",
+  "SUMMARY",
+  "SYSTEM",
 ]);
 
 export const NotificationResponseSchema = z.object({

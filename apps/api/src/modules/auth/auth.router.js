@@ -1,12 +1,15 @@
-import { Router } from 'express';
-import { RegisterRequestSchema, LoginRequestSchema } from '@student-os/contracts';
-import { authService } from './auth.service.js';
-import { requireAuth } from '../../middleware/auth-guard.js';
+import { Router } from "express";
+import {
+  RegisterRequestSchema,
+  LoginRequestSchema,
+} from "@student-os/contracts";
+import { authService } from "./auth.service.js";
+import { requireAuth } from "../../middleware/auth-guard.js";
 
 export const authRouter = Router();
 
 // POST /api/auth/register
-authRouter.post('/register', async (req, res, next) => {
+authRouter.post("/register", async (req, res, next) => {
   try {
     const validatedData = RegisterRequestSchema.parse(req.body);
     const user = await authService.register(validatedData);
@@ -17,7 +20,7 @@ authRouter.post('/register', async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      message: 'Registration successful',
+      message: "Registration successful",
       data: user,
     });
   } catch (error) {
@@ -26,7 +29,7 @@ authRouter.post('/register', async (req, res, next) => {
 });
 
 // POST /api/auth/login
-authRouter.post('/login', async (req, res, next) => {
+authRouter.post("/login", async (req, res, next) => {
   try {
     const validatedData = LoginRequestSchema.parse(req.body);
     const user = await authService.login(validatedData);
@@ -37,7 +40,7 @@ authRouter.post('/login', async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: 'Login successful',
+      message: "Login successful",
       data: user,
     });
   } catch (error) {
@@ -46,22 +49,22 @@ authRouter.post('/login', async (req, res, next) => {
 });
 
 // POST /api/auth/logout
-authRouter.post('/logout', requireAuth, (req, res, next) => {
+authRouter.post("/logout", requireAuth, (req, res, next) => {
   req.session.destroy((err) => {
     if (err) {
       next(err);
       return;
     }
-    res.clearCookie('student_os_sid');
+    res.clearCookie("student_os_sid");
     res.status(200).json({
       success: true,
-      message: 'Logged out successfully',
+      message: "Logged out successfully",
     });
   });
 });
 
 // GET /api/auth/me
-authRouter.get('/me', requireAuth, async (req, res, next) => {
+authRouter.get("/me", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user?.id || req.session.userId;
     const user = await authService.getCurrentUser(userId);

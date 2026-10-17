@@ -40,6 +40,7 @@ export function NotesPage() {
   const [content, setContent] = React.useState("");
   const [attachmentUrl, setAttachmentUrl] = React.useState("");
   const [attachmentName, setAttachmentName] = React.useState("");
+  const [selectedFile, setSelectedFile] = React.useState(null);
   const [saving, setSaving] = React.useState(false);
 
   const fetchNotes = React.useCallback(async () => {
@@ -80,6 +81,7 @@ export function NotesPage() {
     setSubjectId(subjects.length > 0 ? subjects[0].id : "");
     setAttachmentName("");
     setAttachmentUrl("");
+    setSelectedFile(null);
     setIsModalOpen(true);
   };
 
@@ -88,14 +90,46 @@ export function NotesPage() {
     setTitle(note.title);
     setContent(note.content);
     setSubjectId(note.subjectId || "");
-    if (note.attachments && note.attachments.length > 0) {
-      setAttachmentName(note.attachments[0].filename || "");
-      setAttachmentUrl(note.attachments[0].storageKey || "");
-    } else {
-      setAttachmentName("");
-      setAttachmentUrl("");
-    }
+    setAttachmentName("");
+    setAttachmentUrl("");
+    setSelectedFile(null);
     setIsModalOpen(true);
+  };
+
+  const uploadAttachment = async (noteId, file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(`/api/notes/${noteId}/attachments`, {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || "Failed to upload attachment");
+    }
+    return data.data;
+  };
+
+  const handleDeleteAttachment = async (noteId, attachmentId) => {
+    try {
+      const res = await apiClient(
+        `/api/notes/${noteId}/attachments/${attachmentId}`,
+        { method: "DELETE" },
+      );
+      if (res.success) {
+        toast.success("Attachment removed");
+        if (editingNote) {
+          setEditingNote((prev) => ({
+            ...prev,
+            attachments: prev.attachments.filter((a) => a.id !== attachmentId),
+          }));
+        }
+        fetchNotes();
+      }
+    } catch (err) {
+      toast.error(err.message || "Failed to remove attachment");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -109,43 +143,72 @@ export function NotesPage() {
       return;
     }
 
-    const attachments = [];
-    if (attachmentName.trim()) {
-      attachments.push({
-        filename: attachmentName.trim(),
-        url: attachmentUrl.trim() || undefined,
-        storageKey: attachmentUrl.trim() || "embedded",
-      });
-    }
-
     setSaving(true);
     try {
       if (editingNote) {
+        const payload = {
+          title: title.trim(),
+          content: content.trim(),
+          subjectId: subjectId || null,
+        };
+
+        if (attachmentName.trim() && attachmentUrl.trim()) {
+          const existing = editingNote.attachments || [];
+          payload.attachments = [
+            ...existing.map((a) => ({
+              filename: a.filename,
+              storageKey: a.storageKey,
+              size: a.size,
+              mimeType: a.mimeType,
+            })),
+            {
+              filename: attachmentName.trim(),
+              url: attachmentUrl.trim(),
+              storageKey: attachmentUrl.trim(),
+            },
+          ];
+        }
+
         const res = await apiClient(`/api/notes/${editingNote.id}`, {
           method: "PATCH",
-          body: JSON.stringify({
-            title: title.trim(),
-            content: content.trim(),
-            subjectId: subjectId || null,
-            attachments,
-          }),
+          body: JSON.stringify(payload),
         });
+
+        if (selectedFile) {
+          await uploadAttachment(editingNote.id, selectedFile);
+        }
+
         if (res.success) {
           toast.success("Note updated");
           setIsModalOpen(false);
           fetchNotes();
         }
       } else {
+        const payload = {
+          title: title.trim(),
+          content: content.trim(),
+          subjectId: subjectId || null,
+        };
+
+        if (attachmentName.trim() && attachmentUrl.trim()) {
+          payload.attachments = [
+            {
+              filename: attachmentName.trim(),
+              url: attachmentUrl.trim(),
+              storageKey: attachmentUrl.trim(),
+            },
+          ];
+        }
+
         const res = await apiClient("/api/notes", {
           method: "POST",
-          body: JSON.stringify({
-            title: title.trim(),
-            content: content.trim(),
-            subjectId: subjectId || null,
-            attachments,
-          }),
+          body: JSON.stringify(payload),
         });
-        if (res.success) {
+
+        if (res.success && res.data) {
+          if (selectedFile) {
+            await uploadAttachment(res.data.id, selectedFile);
+          }
           toast.success("Note created");
           setIsModalOpen(false);
           fetchNotes();
@@ -303,29 +366,39 @@ export function NotesPage() {
                     {/* Attachments / Links */}
                     {note.attachments && note.attachments.length > 0 && (
                       <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-1">
-                        {note.attachments.map((att) => (
-                          <div
-                            key={att.id || att.filename}
-                            className="flex items-center gap-1.5 text-[11px] text-blue-600 dark:text-blue-400 font-medium"
-                          >
-                            <Paperclip className="h-3 w-3 shrink-0" />
-                            {att.storageKey?.startsWith("http") ? (
+                        {note.attachments.map((att) => {
+                          const isExternal =
+                            att.storageKey?.startsWith("http://") ||
+                            att.storageKey?.startsWith("https://");
+                          const downloadUrl =
+                            att.url ||
+                            `/api/notes/${note.id}/attachments/${att.id}/download`;
+
+                          return (
+                            <div
+                              key={att.id || att.filename}
+                              className="flex items-center gap-1.5 text-[11px] text-blue-600 dark:text-blue-400 font-medium"
+                            >
+                              <Paperclip className="h-3 w-3 shrink-0" />
                               <a
-                                href={att.storageKey}
+                                href={isExternal ? att.storageKey : downloadUrl}
                                 target="_blank"
                                 rel="noreferrer"
+                                download={
+                                  !isExternal ? att.filename : undefined
+                                }
                                 className="hover:underline flex items-center gap-1 line-clamp-1"
                               >
-                                {att.filename}
-                                <ExternalLink className="h-2.5 w-2.5" />
+                                <span className="line-clamp-1">
+                                  {att.filename}
+                                </span>
+                                {isExternal && (
+                                  <ExternalLink className="h-2.5 w-2.5 shrink-0" />
+                                )}
                               </a>
-                            ) : (
-                              <span className="line-clamp-1">
-                                {att.filename}
-                              </span>
-                            )}
-                          </div>
-                        ))}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
 
@@ -414,14 +487,57 @@ export function NotesPage() {
                 />
               </div>
 
+              {/* Existing Attachments if editing */}
+              {editingNote && editingNote.attachments?.length > 0 && (
+                <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Existing Attachments
+                  </label>
+                  <div className="space-y-1">
+                    {editingNote.attachments.map((att) => (
+                      <div
+                        key={att.id}
+                        className="flex items-center justify-between text-xs bg-slate-50 dark:bg-slate-800/60 px-3 py-1.5 rounded-md"
+                      >
+                        <span className="truncate pr-2 text-slate-700 dark:text-slate-300">
+                          {att.filename}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleDeleteAttachment(editingNote.id, att.id)
+                          }
+                          className="text-rose-500 hover:text-rose-700 text-xs font-medium shrink-0"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Upload File */}
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Upload File Attachment (Max 10MB)
+                </label>
+                <input
+                  type="file"
+                  onChange={(e) => setSelectedFile(e.target.files[0] || null)}
+                  className="mt-1 w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-slate-800 dark:file:text-slate-200"
+                />
+              </div>
+
+              {/* External Link */}
               <div className="grid grid-cols-2 gap-3 pt-1 border-t border-slate-100 dark:border-slate-800">
                 <div>
                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Attachment / Resource Label
+                    Resource Link Label
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. Lecture Slides PDF"
+                    placeholder="e.g. Lecture Slides"
                     value={attachmentName}
                     onChange={(e) => setAttachmentName(e.target.value)}
                     className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"

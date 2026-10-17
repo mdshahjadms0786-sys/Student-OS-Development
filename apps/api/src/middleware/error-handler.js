@@ -1,9 +1,9 @@
-import { ZodError } from 'zod';
+import { ZodError } from "zod";
 
 export class AppError extends Error {
   constructor(message, statusCode = 500, errors) {
     super(message);
-    this.name = 'AppError';
+    this.name = "AppError";
     this.statusCode = statusCode;
     this.errors = errors;
     Error.captureStackTrace(this, this.constructor);
@@ -20,11 +20,11 @@ export function notFoundHandler(req, res) {
 export function errorHandler(err, req, res, _next) {
   if (err instanceof ZodError) {
     const errorMessages = err.errors.map(
-      (e) => `${e.path.join('.') || 'body'}: ${e.message}`
+      (e) => `${e.path.join(".") || "body"}: ${e.message}`,
     );
     res.status(400).json({
       success: false,
-      message: 'Validation failed',
+      message: "Validation failed",
       errors: errorMessages,
     });
     return;
@@ -39,13 +39,30 @@ export function errorHandler(err, req, res, _next) {
     return;
   }
 
-  const error = err;
-  const isProd = process.env['NODE_ENV'] === 'production';
+  if (err.name === "MulterError") {
+    let message = err.message;
+    if (err.code === "LIMIT_FILE_SIZE") {
+      message = "File size exceeds maximum limit of 10MB";
+    }
+    res.status(400).json({
+      success: false,
+      message,
+    });
+    return;
+  }
 
-  console.error(`[Unhandled Exception] ${req.method} ${req.originalUrl}:`, error);
+  const error = err;
+  const isProd = process.env["NODE_ENV"] === "production";
+
+  console.error(
+    `[Unhandled Exception] ${req.method} ${req.originalUrl}:`,
+    error,
+  );
 
   res.status(500).json({
     success: false,
-    message: isProd ? 'Internal Server Error' : error?.message || 'An unexpected error occurred',
+    message: isProd
+      ? "Internal Server Error"
+      : error?.message || "An unexpected error occurred",
   });
 }

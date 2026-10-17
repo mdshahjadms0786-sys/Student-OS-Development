@@ -43,7 +43,8 @@ describe("AI Intelligence API (Phase 4)", () => {
       .send({
         subjectId,
         title: "Dynamic Programming Foundations",
-        content: "Dynamic Programming (DP) optimizes recursive solutions by storing overlapping subproblem solutions in a memoization table or bottom-up array. Key examples include Fibonacci, Knapsack, and Longest Common Subsequence.",
+        content:
+          "Dynamic Programming (DP) optimizes recursive solutions by storing overlapping subproblem solutions in a memoization table or bottom-up array. Key examples include Fibonacci, Knapsack, and Longest Common Subsequence.",
       });
     noteId = noteRes.body.data.id;
 
@@ -113,13 +114,17 @@ describe("AI Intelligence API (Phase 4)", () => {
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);
     expect(res.body.data.acceptedCount).toBe(1);
-    expect(res.body.data.tasks[0].title).toBe("AI Study Task: Graph Traversal Review");
+    expect(res.body.data.tasks[0].title).toBe(
+      "AI Study Task: Graph Traversal Review",
+    );
 
     // Verify task is now present in user's task list
-    const tasksRes = await request(app)
-      .get("/api/tasks")
-      .set("Cookie", cookie);
-    expect(tasksRes.body.data.some((t) => t.title === "AI Study Task: Graph Traversal Review")).toBe(true);
+    const tasksRes = await request(app).get("/api/tasks").set("Cookie", cookie);
+    expect(
+      tasksRes.body.data.some(
+        (t) => t.title === "AI Study Task: Graph Traversal Review",
+      ),
+    ).toBe(true);
   });
 
   it("POST /api/ai/doubt-assistant answers student questions with subject context", async () => {

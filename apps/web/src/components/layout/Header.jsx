@@ -1,8 +1,8 @@
-import * as React from 'react';
-import { Sun, Moon, Bell, GraduationCap } from 'lucide-react';
-import { useTheme } from '../../lib/theme.jsx';
-import { Button } from '@student-os/ui';
-import { apiClient } from '../../lib/api-client.js';
+import * as React from "react";
+import { Sun, Moon, Bell, GraduationCap } from "lucide-react";
+import { useTheme } from "../../lib/theme.jsx";
+import { Button } from "@student-os/ui";
+import { apiClient } from "../../lib/api-client.js";
 
 export function Header({ user, onNavigate }) {
   const { theme, setTheme } = useTheme();
@@ -12,7 +12,7 @@ export function Header({ user, onNavigate }) {
     if (!user) return;
     async function checkNotifications() {
       try {
-        const res = await apiClient('/api/notifications?unread=true');
+        const res = await apiClient("/api/notifications?unread=true");
         if (res.success && res.data) {
           setUnreadCount(res.data.unreadCount);
         }
@@ -27,15 +27,18 @@ export function Header({ user, onNavigate }) {
 
   const handleNotificationsClick = () => {
     if (onNavigate) {
-      onNavigate('#notifications');
+      onNavigate("#notifications");
     } else {
-      window.location.hash = '#notifications';
+      window.location.hash = "#notifications";
     }
   };
 
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 sm:px-6">
-      <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.location.hash = '#home'}>
+      <div
+        className="flex items-center gap-3 cursor-pointer"
+        onClick={() => (window.location.hash = "#home")}
+      >
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm">
           <GraduationCap className="h-5 w-5" />
         </div>
@@ -60,7 +63,7 @@ export function Header({ user, onNavigate }) {
           <Bell className="h-5 w-5" />
           {unreadCount > 0 ? (
             <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-600 px-1 text-[10px] font-bold text-white ring-2 ring-white dark:ring-slate-900">
-              {unreadCount > 9 ? '9+' : unreadCount}
+              {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           ) : null}
         </Button>
@@ -69,10 +72,14 @@ export function Header({ user, onNavigate }) {
           variant="ghost"
           size="icon"
           aria-label="Toggle theme"
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           className="text-slate-600 dark:text-slate-300"
         >
-          {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          {theme === "dark" ? (
+            <Sun className="h-5 w-5" />
+          ) : (
+            <Moon className="h-5 w-5" />
+          )}
         </Button>
 
         {user && (

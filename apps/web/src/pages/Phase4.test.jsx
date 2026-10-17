@@ -44,9 +44,7 @@ describe("Phase 4 AI Frontend Components", () => {
           ok: true,
           json: () =>
             Promise.resolve({
-              data: [
-                { id: "s1", code: "CS101", name: "Data Structures" },
-              ],
+              data: [{ id: "s1", code: "CS101", name: "Data Structures" }],
             }),
         });
       }
@@ -56,7 +54,11 @@ describe("Phase 4 AI Frontend Components", () => {
           json: () =>
             Promise.resolve({
               data: [
-                { id: "n1", title: "Binary Trees Note", content: "Tree concepts" },
+                {
+                  id: "n1",
+                  title: "Binary Trees Note",
+                  content: "Tree concepts",
+                },
               ],
             }),
         });
@@ -67,7 +69,11 @@ describe("Phase 4 AI Frontend Components", () => {
           json: () =>
             Promise.resolve({
               data: [
-                { id: "e1", title: "Data Structures Final Exam", examAt: new Date().toISOString() },
+                {
+                  id: "e1",
+                  title: "Data Structures Final Exam",
+                  examAt: new Date().toISOString(),
+                },
               ],
             }),
         });
@@ -104,11 +110,13 @@ describe("Phase 4 AI Frontend Components", () => {
       render(
         <ThemeProvider defaultTheme="light">
           <AiPage />
-        </ThemeProvider>
+        </ThemeProvider>,
       );
     });
 
-    expect(screen.getByRole("heading", { name: /^AI Intelligence Center$/i })).toBeDefined();
+    expect(
+      screen.getByRole("heading", { name: /^AI Intelligence Center$/i }),
+    ).toBeDefined();
     expect(screen.getByText("Phase 4 Active")).toBeDefined();
     expect(screen.getByText("Study Planner")).toBeDefined();
     expect(screen.getByText("Doubt Assistant")).toBeDefined();

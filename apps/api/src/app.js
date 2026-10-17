@@ -26,7 +26,6 @@ import { notesRouter } from "./modules/notes/notes.router.js";
 import { analyticsRouter } from "./modules/analytics/analytics.router.js";
 import { aiRouter } from "./modules/ai/ai.router.js";
 
-
 export function createApp() {
   const app = express();
 
@@ -126,7 +125,6 @@ export function createApp() {
   app.use("/api/notes", notesRouter);
   app.use("/api/analytics", analyticsRouter);
   app.use("/api/ai", aiRouter);
-
 
   // Error Handling
   app.use(notFoundHandler);

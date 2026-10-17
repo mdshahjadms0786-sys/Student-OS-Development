@@ -1,5 +1,5 @@
-import { prisma } from '@student-os/database';
-import { AppError } from '../../middleware/error-handler.js';
+import { prisma } from "@student-os/database";
+import { AppError } from "../../middleware/error-handler.js";
 
 export class ProfileService {
   async getProfile(userId) {
@@ -9,7 +9,7 @@ export class ProfileService {
     });
 
     if (!user) {
-      throw new AppError('User not found', 404);
+      throw new AppError("User not found", 404);
     }
 
     let profile = user.profile;
@@ -33,7 +33,7 @@ export class ProfileService {
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
-      throw new AppError('User not found', 404);
+      throw new AppError("User not found", 404);
     }
 
     if (name !== undefined) {
@@ -50,7 +50,7 @@ export class ProfileService {
     });
 
     const updatedUser = await prisma.user.findUnique({ where: { id: userId } });
-    
+
     return {
       name: updatedUser?.name,
       email: updatedUser?.email,

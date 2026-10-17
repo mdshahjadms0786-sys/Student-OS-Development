@@ -1,16 +1,19 @@
-import { Router } from 'express';
-import { requireAuth } from '../../middleware/auth-guard.js';
-import { NotificationsService } from './notifications.service.js';
-import { UpdateNotificationPreferenceRequestSchema } from '@student-os/contracts';
+import { Router } from "express";
+import { requireAuth } from "../../middleware/auth-guard.js";
+import { NotificationsService } from "./notifications.service.js";
+import { UpdateNotificationPreferenceRequestSchema } from "@student-os/contracts";
 
 export const notificationsRouter = Router();
 const notificationsService = new NotificationsService();
 
-notificationsRouter.get('/', requireAuth, async (req, res, next) => {
+notificationsRouter.get("/", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const unreadOnly = req.query.unread === 'true';
-    const notifications = await notificationsService.listNotifications(userId, unreadOnly);
+    const unreadOnly = req.query.unread === "true";
+    const notifications = await notificationsService.listNotifications(
+      userId,
+      unreadOnly,
+    );
     const unreadCount = await notificationsService.getUnreadCount(userId);
     res.json({ success: true, data: { notifications, unreadCount } });
   } catch (error) {
@@ -18,21 +21,24 @@ notificationsRouter.get('/', requireAuth, async (req, res, next) => {
   }
 });
 
-notificationsRouter.post('/:id/read', requireAuth, async (req, res, next) => {
+notificationsRouter.post("/:id/read", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const notification = await notificationsService.markAsRead(req.params.id, userId);
+    const notification = await notificationsService.markAsRead(
+      req.params.id,
+      userId,
+    );
     res.json({ success: true, data: notification });
   } catch (error) {
     next(error);
   }
 });
 
-notificationsRouter.post('/read-all', requireAuth, async (req, res, next) => {
+notificationsRouter.post("/read-all", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user.id;
     await notificationsService.markAllAsRead(userId);
-    res.json({ success: true, message: 'All notifications marked as read' });
+    res.json({ success: true, message: "All notifications marked as read" });
   } catch (error) {
     next(error);
   }
@@ -40,7 +46,7 @@ notificationsRouter.post('/read-all', requireAuth, async (req, res, next) => {
 
 export const notificationPreferencesRouter = Router();
 
-notificationPreferencesRouter.get('/', requireAuth, async (req, res, next) => {
+notificationPreferencesRouter.get("/", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user.id;
     const preferences = await notificationsService.getPreferences(userId);
@@ -50,13 +56,20 @@ notificationPreferencesRouter.get('/', requireAuth, async (req, res, next) => {
   }
 });
 
-notificationPreferencesRouter.patch('/', requireAuth, async (req, res, next) => {
-  try {
-    const userId = req.user.id;
-    const data = UpdateNotificationPreferenceRequestSchema.parse(req.body);
-    const preference = await notificationsService.updatePreference(userId, data);
-    res.json({ success: true, data: preference });
-  } catch (error) {
-    next(error);
-  }
-});
+notificationPreferencesRouter.patch(
+  "/",
+  requireAuth,
+  async (req, res, next) => {
+    try {
+      const userId = req.user.id;
+      const data = UpdateNotificationPreferenceRequestSchema.parse(req.body);
+      const preference = await notificationsService.updatePreference(
+        userId,
+        data,
+      );
+      res.json({ success: true, data: preference });
+    } catch (error) {
+      next(error);
+    }
+  },
+);

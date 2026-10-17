@@ -16,8 +16,12 @@ import {
   CalendarDays,
   Bot,
   Info,
+  Edit2,
+  Trash2,
+  Check,
 } from "lucide-react";
 import { AppShell } from "../components/layout/AppShell.jsx";
+import { apiClient } from "../lib/api-client.js";
 import { cn } from "@student-os/ui";
 
 export function AiPage() {
@@ -35,6 +39,7 @@ export function AiPage() {
     targetSubjectId: "",
   });
   const [generatedPlan, setGeneratedPlan] = useState(null);
+  const [editingItemIndex, setEditingItemIndex] = useState(null);
   const [planLoading, setPlanLoading] = useState(false);
   const [acceptingPlan, setAcceptingPlan] = useState(false);
   const [planAcceptedSuccess, setPlanAcceptedSuccess] = useState(null);
@@ -71,23 +76,14 @@ export function AiPage() {
   const fetchInitialData = async () => {
     try {
       const [subRes, notesRes, examsRes] = await Promise.all([
-        fetch("/api/subjects"),
-        fetch("/api/notes"),
-        fetch("/api/exams"),
+        apiClient("/api/subjects"),
+        apiClient("/api/notes"),
+        apiClient("/api/exams"),
       ]);
 
-      if (subRes.ok) {
-        const d = await subRes.json();
-        setSubjects(d.data || []);
-      }
-      if (notesRes.ok) {
-        const d = await notesRes.json();
-        setNotes(d.data || []);
-      }
-      if (examsRes.ok) {
-        const d = await examsRes.json();
-        setExams(d.data || []);
-      }
+      if (subRes.data) setSubjects(subRes.data);
+      if (notesRes.data) setNotes(notesRes.data);
+      if (examsRes.data) setExams(examsRes.data);
     } catch {
       // Ignore initial fetch errors
     }
@@ -96,10 +92,9 @@ export function AiPage() {
   const fetchRecommendations = async () => {
     setRecommendationsLoading(true);
     try {
-      const res = await fetch("/api/ai/recommendations");
-      if (res.ok) {
-        const data = await res.json();
-        setRecommendations(data.data);
+      const res = await apiClient("/api/ai/recommendations");
+      if (res.data) {
+        setRecommendations(res.data);
       }
     } catch {
       // Ignore recommendations load failure
@@ -114,48 +109,96 @@ export function AiPage() {
     setPlanLoading(true);
     setErrorMsg("");
     setPlanAcceptedSuccess(null);
+    setEditingItemIndex(null);
     try {
-      const res = await fetch("/api/ai/study-plan", {
+      const res = await apiClient("/api/ai/study-plan", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           studyHoursPerDay: Number(plannerOptions.studyHoursPerDay),
           days: Number(plannerOptions.days),
           targetSubjectId: plannerOptions.targetSubjectId || undefined,
         }),
       });
-      const data = await res.json();
-      if (res.ok) {
-        setGeneratedPlan(data.data);
-      } else {
-        setErrorMsg(data.message || "Failed to generate study plan.");
-      }
-    } catch {
-      setErrorMsg("Network error generating study plan.");
+      setGeneratedPlan(res.data);
+    } catch (err) {
+      setErrorMsg(err.message || "Failed to generate study plan.");
     } finally {
       setPlanLoading(false);
     }
   };
 
+  // Study Plan item edit handlers
+  const handleUpdatePlanItem = (index, field, value) => {
+    if (!generatedPlan || !generatedPlan.items) return;
+    const updated = [...generatedPlan.items];
+    updated[index] = { ...updated[index], [field]: value };
+    if (field === "subjectId") {
+      const sub = subjects.find((s) => s.id === value);
+      updated[index].subjectName = sub ? sub.code : "General";
+    }
+    setGeneratedPlan({ ...generatedPlan, items: updated });
+  };
+
+  const handleDeletePlanItem = (index) => {
+    if (!generatedPlan || !generatedPlan.items) return;
+    const updated = generatedPlan.items.filter((_, i) => i !== index);
+    setGeneratedPlan({ ...generatedPlan, items: updated });
+    if (editingItemIndex === index) {
+      setEditingItemIndex(null);
+    } else if (editingItemIndex > index) {
+      setEditingItemIndex(editingItemIndex - 1);
+    }
+  };
+
+  const handleAddPlanItem = () => {
+    if (!generatedPlan) return;
+    const newItem = {
+      title: "New Study Task",
+      description: "Self-study and practice",
+      subjectId: subjects[0]?.id || null,
+      subjectName: subjects[0]?.code || "General",
+      date: new Date().toISOString(),
+      durationMinutes: 60,
+      priority: "MEDIUM",
+      category: "STUDY",
+    };
+    const updated = [...(generatedPlan.items || []), newItem];
+    setGeneratedPlan({ ...generatedPlan, items: updated });
+    setEditingItemIndex(updated.length - 1);
+  };
+
   // 2. Accept Study Plan
   const handleAcceptPlan = async () => {
-    if (!generatedPlan || !generatedPlan.items) return;
+    if (
+      !generatedPlan ||
+      !generatedPlan.items ||
+      generatedPlan.items.length === 0
+    ) {
+      setErrorMsg("Please keep at least one study task before accepting.");
+      return;
+    }
     setAcceptingPlan(true);
     setErrorMsg("");
     try {
-      const res = await fetch("/api/ai/study-plan/accept", {
+      const itemsToAccept = generatedPlan.items.map((item) => ({
+        title: item.title.trim(),
+        description: item.description?.trim() || null,
+        subjectId: item.subjectId || null,
+        date: item.date || new Date().toISOString(),
+        durationMinutes: Number(item.durationMinutes) || 60,
+        priority: item.priority || "MEDIUM",
+        category: item.category || "STUDY",
+      }));
+
+      const res = await apiClient("/api/ai/study-plan/accept", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: generatedPlan.items }),
+        body: JSON.stringify({ items: itemsToAccept }),
       });
-      const data = await res.json();
-      if (res.ok) {
-        setPlanAcceptedSuccess(data.data?.message || "Plan items added to your tasks!");
-      } else {
-        setErrorMsg(data.message || "Failed to accept plan.");
-      }
-    } catch {
-      setErrorMsg("Error committing study plan.");
+      setPlanAcceptedSuccess(
+        res.data?.message || "Plan items added to your tasks!",
+      );
+    } catch (err) {
+      setErrorMsg(err.message || "Failed to accept plan.");
     } finally {
       setAcceptingPlan(false);
     }
@@ -168,22 +211,16 @@ export function AiPage() {
     setDoubtLoading(true);
     setErrorMsg("");
     try {
-      const res = await fetch("/api/ai/doubt-assistant", {
+      const res = await apiClient("/api/ai/doubt-assistant", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question: doubtQuery,
           subjectId: doubtSubjectId || undefined,
         }),
       });
-      const data = await res.json();
-      if (res.ok) {
-        setDoubtResult(data.data);
-      } else {
-        setErrorMsg(data.message || "Failed to resolve question.");
-      }
-    } catch {
-      setErrorMsg("Network error resolving question.");
+      setDoubtResult(res.data);
+    } catch (err) {
+      setErrorMsg(err.message || "Failed to resolve question.");
     } finally {
       setDoubtLoading(false);
     }
@@ -196,22 +233,16 @@ export function AiPage() {
     setNoteSummaryLoading(true);
     setErrorMsg("");
     try {
-      const res = await fetch("/api/ai/notes-summary", {
+      const res = await apiClient("/api/ai/notes-summary", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           noteId: selectedNoteId || undefined,
           content: selectedNoteId ? undefined : customNoteContent,
         }),
       });
-      const data = await res.json();
-      if (res.ok) {
-        setNoteSummaryResult(data.data);
-      } else {
-        setErrorMsg(data.message || "Failed to summarize note.");
-      }
-    } catch {
-      setErrorMsg("Network error generating summary.");
+      setNoteSummaryResult(res.data);
+    } catch (err) {
+      setErrorMsg(err.message || "Failed to summarize note.");
     } finally {
       setNoteSummaryLoading(false);
     }
@@ -224,19 +255,13 @@ export function AiPage() {
     setExamPrepLoading(true);
     setErrorMsg("");
     try {
-      const res = await fetch("/api/ai/exam-prep", {
+      const res = await apiClient("/api/ai/exam-prep", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ examId: selectedExamId }),
       });
-      const data = await res.json();
-      if (res.ok) {
-        setExamPrepResult(data.data);
-      } else {
-        setErrorMsg(data.message || "Failed to generate exam prep guide.");
-      }
-    } catch {
-      setErrorMsg("Network error generating exam prep.");
+      setExamPrepResult(res.data);
+    } catch (err) {
+      setErrorMsg(err.message || "Failed to generate exam prep guide.");
     } finally {
       setExamPrepLoading(false);
     }
@@ -256,13 +281,17 @@ export function AiPage() {
               </span>
             </div>
             <p className="mt-1 text-sm text-blue-100">
-              Personalized study planning, doubt resolution, note summaries & exam prep powered by your academic workflow.
+              Personalized study planning, doubt resolution, note summaries &
+              exam prep powered by your academic workflow.
             </p>
           </div>
 
           <div className="flex items-center gap-2 rounded-lg bg-white/10 p-3 text-xs text-blue-100 backdrop-blur-sm">
             <Bot className="h-5 w-5 text-amber-300 shrink-0" />
-            <span>AI outputs require explicit user review & never alter official university records.</span>
+            <span>
+              AI outputs require explicit user review & never alter official
+              university records.
+            </span>
           </div>
         </div>
 
@@ -293,7 +322,7 @@ export function AiPage() {
                   "flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors",
                   isActive
                     ? "border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400"
-                    : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                    : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200",
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -313,7 +342,8 @@ export function AiPage() {
                 Configure Study Plan
               </h2>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Generate an optimized daily schedule based on your upcoming exams and pending tasks.
+                Generate an optimized daily schedule based on your upcoming
+                exams and pending tasks.
               </p>
 
               <form onSubmit={handleGeneratePlan} className="mt-4 space-y-4">
@@ -326,7 +356,12 @@ export function AiPage() {
                     min="1"
                     max="16"
                     value={plannerOptions.studyHoursPerDay}
-                    onChange={(e) => setPlannerOptions({ ...plannerOptions, studyHoursPerDay: e.target.value })}
+                    onChange={(e) =>
+                      setPlannerOptions({
+                        ...plannerOptions,
+                        studyHoursPerDay: e.target.value,
+                      })
+                    }
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                   />
                 </div>
@@ -337,7 +372,12 @@ export function AiPage() {
                   </label>
                   <select
                     value={plannerOptions.days}
-                    onChange={(e) => setPlannerOptions({ ...plannerOptions, days: e.target.value })}
+                    onChange={(e) =>
+                      setPlannerOptions({
+                        ...plannerOptions,
+                        days: e.target.value,
+                      })
+                    }
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                   >
                     <option value="3">3 Days (Sprint)</option>
@@ -352,7 +392,12 @@ export function AiPage() {
                   </label>
                   <select
                     value={plannerOptions.targetSubjectId}
-                    onChange={(e) => setPlannerOptions({ ...plannerOptions, targetSubjectId: e.target.value })}
+                    onChange={(e) =>
+                      setPlannerOptions({
+                        ...plannerOptions,
+                        targetSubjectId: e.target.value,
+                      })
+                    }
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                   >
                     <option value="">All Subjects (Balanced)</option>
@@ -387,7 +432,9 @@ export function AiPage() {
                     <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                     <span>{planAcceptedSuccess}</span>
                   </div>
-                  <a href="#tasks" className="font-semibold underline">View Tasks</a>
+                  <a href="#tasks" className="font-semibold underline">
+                    View Tasks
+                  </a>
                 </div>
               )}
 
@@ -428,38 +475,242 @@ export function AiPage() {
                     <span>{generatedPlan.disclaimer}</span>
                   </div>
 
-                  {/* Proposed Plan Items */}
+                  {/* Proposed Plan Items with Inline Editing */}
                   <div className="mt-6 space-y-3">
-                    {generatedPlan.items.map((item, idx) => (
-                      <div
-                        key={item.id || idx}
-                        className="flex flex-col gap-2 rounded-lg border border-slate-200 p-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between"
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        Roadmap Sessions ({generatedPlan.items.length})
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleAddPlanItem}
+                        className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400"
                       >
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-slate-900 dark:text-slate-100">
-                              {item.title}
-                            </span>
-                            <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-                              {item.subjectName}
-                            </span>
-                          </div>
-                          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                            {item.description}
-                          </p>
-                        </div>
+                        <Plus className="h-3.5 w-3.5" />
+                        <span>Add Task</span>
+                      </button>
+                    </div>
 
-                        <div className="flex items-center gap-3 text-xs text-slate-500 shrink-0">
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5" />
-                            {item.durationMinutes} min
-                          </span>
-                          <span className="rounded bg-amber-100 px-2 py-0.5 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-                            {item.category}
-                          </span>
+                    {generatedPlan.items.map((item, idx) => {
+                      const isEditing = editingItemIndex === idx;
+
+                      if (isEditing) {
+                        return (
+                          <div
+                            key={item.id || idx}
+                            className="rounded-lg border border-blue-300 dark:border-blue-700 bg-blue-50/40 dark:bg-blue-950/20 p-4 space-y-3"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-blue-700 dark:text-blue-300">
+                                Editing Task #{idx + 1}
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingItemIndex(null)}
+                                  className="flex items-center gap-1 rounded bg-blue-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-blue-700"
+                                >
+                                  <Check className="h-3 w-3" />
+                                  <span>Done</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeletePlanItem(idx)}
+                                  className="flex items-center gap-1 rounded bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 dark:bg-rose-950/30 dark:text-rose-400"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                  <span>Remove</span>
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="grid gap-3 sm:grid-cols-2">
+                              <div className="sm:col-span-2">
+                                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                  Task Title *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={item.title}
+                                  onChange={(e) =>
+                                    handleUpdatePlanItem(
+                                      idx,
+                                      "title",
+                                      e.target.value,
+                                    )
+                                  }
+                                  className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                                />
+                              </div>
+
+                              <div className="sm:col-span-2">
+                                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                  Description / Notes
+                                </label>
+                                <input
+                                  type="text"
+                                  value={item.description || ""}
+                                  onChange={(e) =>
+                                    handleUpdatePlanItem(
+                                      idx,
+                                      "description",
+                                      e.target.value,
+                                    )
+                                  }
+                                  className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                  Course Subject
+                                </label>
+                                <select
+                                  value={item.subjectId || ""}
+                                  onChange={(e) =>
+                                    handleUpdatePlanItem(
+                                      idx,
+                                      "subjectId",
+                                      e.target.value || null,
+                                    )
+                                  }
+                                  className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                                >
+                                  <option value="">General (No Subject)</option>
+                                  {subjects.map((s) => (
+                                    <option key={s.id} value={s.id}>
+                                      {s.code} - {s.name}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              <div>
+                                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                  Duration (Minutes)
+                                </label>
+                                <input
+                                  type="number"
+                                  min={15}
+                                  max={480}
+                                  step={15}
+                                  value={item.durationMinutes}
+                                  onChange={(e) =>
+                                    handleUpdatePlanItem(
+                                      idx,
+                                      "durationMinutes",
+                                      Number(e.target.value),
+                                    )
+                                  }
+                                  className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                  Priority
+                                </label>
+                                <select
+                                  value={item.priority || "MEDIUM"}
+                                  onChange={(e) =>
+                                    handleUpdatePlanItem(
+                                      idx,
+                                      "priority",
+                                      e.target.value,
+                                    )
+                                  }
+                                  className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                                >
+                                  <option value="LOW">Low</option>
+                                  <option value="MEDIUM">Medium</option>
+                                  <option value="HIGH">High</option>
+                                  <option value="URGENT">Urgent</option>
+                                </select>
+                              </div>
+
+                              <div>
+                                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                  Category
+                                </label>
+                                <select
+                                  value={item.category || "STUDY"}
+                                  onChange={(e) =>
+                                    handleUpdatePlanItem(
+                                      idx,
+                                      "category",
+                                      e.target.value,
+                                    )
+                                  }
+                                  className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                                >
+                                  <option value="STUDY">Study</option>
+                                  <option value="REVISION">Revision</option>
+                                  <option value="ASSIGNMENT">Assignment</option>
+                                  <option value="PROJECT">Project</option>
+                                  <option value="OTHER">Other</option>
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div
+                          key={item.id || idx}
+                          className="flex flex-col gap-2 rounded-lg border border-slate-200 p-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-slate-900 dark:text-slate-100">
+                                {item.title}
+                              </span>
+                              <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                                {item.subjectName || "General"}
+                              </span>
+                            </div>
+                            {item.description && (
+                              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                {item.description}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <div className="flex items-center gap-2 text-xs text-slate-500 mr-2">
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3.5 w-3.5" />
+                                {item.durationMinutes} min
+                              </span>
+                              <span className="rounded bg-amber-100 px-2 py-0.5 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                                {item.category}
+                              </span>
+                              {item.priority && item.priority !== "MEDIUM" && (
+                                <span className="rounded bg-rose-100 px-2 py-0.5 text-rose-800 dark:bg-rose-950/30 dark:text-rose-300 font-semibold">
+                                  {item.priority}
+                                </span>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setEditingItemIndex(idx)}
+                              className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                              title="Edit task"
+                            >
+                              <Edit2 className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeletePlanItem(idx)}
+                              className="p-1 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400"
+                              title="Remove task"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ) : (
@@ -469,7 +720,8 @@ export function AiPage() {
                     No Plan Generated Yet
                   </h3>
                   <p className="mt-1 text-xs text-slate-500 max-w-sm">
-                    Configure your preferences on the left and click "Generate Roadmap" to create a personalized study schedule.
+                    Configure your preferences on the left and click "Generate
+                    Roadmap" to create a personalized study schedule.
                   </p>
                 </div>
               )}
@@ -486,7 +738,8 @@ export function AiPage() {
                 Ask a Question
               </h2>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Get instant educational explanations, code examples, and next steps for your course subjects.
+                Get instant educational explanations, code examples, and next
+                steps for your course subjects.
               </p>
 
               <form onSubmit={handleAskDoubt} className="mt-4 space-y-4">
@@ -554,33 +807,41 @@ export function AiPage() {
 
                   <div className="mt-4 space-y-4">
                     <div>
-                      <h4 className="text-xs font-semibold uppercase text-slate-400">Explanation</h4>
+                      <h4 className="text-xs font-semibold uppercase text-slate-400">
+                        Explanation
+                      </h4>
                       <p className="mt-1 text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line">
                         {doubtResult.explanation}
                       </p>
                     </div>
 
-                    {doubtResult.examples && doubtResult.examples.length > 0 && (
-                      <div>
-                        <h4 className="text-xs font-semibold uppercase text-slate-400">Examples & Applications</h4>
-                        <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700 dark:text-slate-300">
-                          {doubtResult.examples.map((ex, i) => (
-                            <li key={i}>{ex}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                    {doubtResult.examples &&
+                      doubtResult.examples.length > 0 && (
+                        <div>
+                          <h4 className="text-xs font-semibold uppercase text-slate-400">
+                            Examples & Applications
+                          </h4>
+                          <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700 dark:text-slate-300">
+                            {doubtResult.examples.map((ex, i) => (
+                              <li key={i}>{ex}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
 
-                    {doubtResult.nextSteps && doubtResult.nextSteps.length > 0 && (
-                      <div>
-                        <h4 className="text-xs font-semibold uppercase text-slate-400">Recommended Next Steps</h4>
-                        <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700 dark:text-slate-300">
-                          {doubtResult.nextSteps.map((step, i) => (
-                            <li key={i}>{step}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                    {doubtResult.nextSteps &&
+                      doubtResult.nextSteps.length > 0 && (
+                        <div>
+                          <h4 className="text-xs font-semibold uppercase text-slate-400">
+                            Recommended Next Steps
+                          </h4>
+                          <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700 dark:text-slate-300">
+                            {doubtResult.nextSteps.map((step, i) => (
+                              <li key={i}>{step}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                   </div>
                 </div>
               ) : (
@@ -590,7 +851,8 @@ export function AiPage() {
                     Ask Anything Academic
                   </h3>
                   <p className="mt-1 text-xs text-slate-500 max-w-sm">
-                    Enter your question in the box to get structured explanations and learning steps.
+                    Enter your question in the box to get structured
+                    explanations and learning steps.
                   </p>
                 </div>
               )}
@@ -607,7 +869,8 @@ export function AiPage() {
                 Summarize Note
               </h2>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Select an existing note or paste text to extract key points and self-test revision questions.
+                Select an existing note or paste text to extract key points and
+                self-test revision questions.
               </p>
 
               <form onSubmit={handleSummarizeNote} className="mt-4 space-y-4">
@@ -649,7 +912,10 @@ export function AiPage() {
 
                 <button
                   type="submit"
-                  disabled={noteSummaryLoading || (!selectedNoteId && !customNoteContent.trim())}
+                  disabled={
+                    noteSummaryLoading ||
+                    (!selectedNoteId && !customNoteContent.trim())
+                  }
                   className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
                 >
                   {noteSummaryLoading ? (
@@ -679,14 +945,18 @@ export function AiPage() {
 
                   <div className="mt-4 space-y-4">
                     <div>
-                      <h4 className="text-xs font-semibold uppercase text-slate-400">Summary Overview</h4>
+                      <h4 className="text-xs font-semibold uppercase text-slate-400">
+                        Summary Overview
+                      </h4>
                       <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
                         {noteSummaryResult.summary}
                       </p>
                     </div>
 
                     <div>
-                      <h4 className="text-xs font-semibold uppercase text-slate-400">Key Takeaways</h4>
+                      <h4 className="text-xs font-semibold uppercase text-slate-400">
+                        Key Takeaways
+                      </h4>
                       <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700 dark:text-slate-300">
                         {noteSummaryResult.keyPoints.map((pt, i) => (
                           <li key={i}>{pt}</li>
@@ -695,10 +965,15 @@ export function AiPage() {
                     </div>
 
                     <div>
-                      <h4 className="text-xs font-semibold uppercase text-slate-400">Self-Test Revision Questions</h4>
+                      <h4 className="text-xs font-semibold uppercase text-slate-400">
+                        Self-Test Revision Questions
+                      </h4>
                       <div className="mt-2 space-y-2">
                         {noteSummaryResult.revisionQuestions.map((q, i) => (
-                          <div key={i} className="rounded-lg bg-slate-50 p-3 text-xs font-medium text-slate-800 dark:bg-slate-800/50 dark:text-slate-200">
+                          <div
+                            key={i}
+                            className="rounded-lg bg-slate-50 p-3 text-xs font-medium text-slate-800 dark:bg-slate-800/50 dark:text-slate-200"
+                          >
                             Q{i + 1}: {q}
                           </div>
                         ))}
@@ -713,7 +988,8 @@ export function AiPage() {
                     Summarize Your Notes
                   </h3>
                   <p className="mt-1 text-xs text-slate-500 max-w-sm">
-                    Select a note from the dropdown to automatically extract key concepts and practice questions.
+                    Select a note from the dropdown to automatically extract key
+                    concepts and practice questions.
                   </p>
                 </div>
               )}
@@ -730,10 +1006,14 @@ export function AiPage() {
                 Exam Prep Generator
               </h2>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Select an upcoming exam to generate structured revision timelines, practice questions, and prep checklists.
+                Select an upcoming exam to generate structured revision
+                timelines, practice questions, and prep checklists.
               </p>
 
-              <form onSubmit={handleGenerateExamPrep} className="mt-4 space-y-4">
+              <form
+                onSubmit={handleGenerateExamPrep}
+                className="mt-4 space-y-4"
+              >
                 <div>
                   <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
                     Select Exam
@@ -781,7 +1061,8 @@ export function AiPage() {
                         {examPrepResult.examTitle}
                       </h3>
                       <p className="text-xs text-slate-500">
-                        {examPrepResult.subjectName} • Exam Date: {examPrepResult.examDate}
+                        {examPrepResult.subjectName} • Exam Date:{" "}
+                        {examPrepResult.examDate}
                       </p>
                     </div>
                   </div>
@@ -789,15 +1070,24 @@ export function AiPage() {
                   <div className="mt-6 space-y-6">
                     {/* Revision Plan */}
                     <div>
-                      <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Revision Plan Timeline</h4>
+                      <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        Revision Plan Timeline
+                      </h4>
                       <div className="mt-2 space-y-3">
                         {examPrepResult.revisionPlan.map((step, idx) => (
-                          <div key={idx} className="rounded-lg border border-slate-200 p-3 dark:border-slate-800">
+                          <div
+                            key={idx}
+                            className="rounded-lg border border-slate-200 p-3 dark:border-slate-800"
+                          >
                             <div className="flex items-center justify-between text-xs font-semibold text-slate-900 dark:text-slate-100">
                               <span>{step.phase}</span>
-                              <span className="text-blue-600">{step.estimatedHours} hrs</span>
+                              <span className="text-blue-600">
+                                {step.estimatedHours} hrs
+                              </span>
                             </div>
-                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{step.details}</p>
+                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                              {step.details}
+                            </p>
                           </div>
                         ))}
                       </div>
@@ -805,14 +1095,21 @@ export function AiPage() {
 
                     {/* Practice Questions */}
                     <div>
-                      <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Practice Questions & Hints</h4>
+                      <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        Practice Questions & Hints
+                      </h4>
                       <div className="mt-2 space-y-3">
                         {examPrepResult.practiceQuestions.map((pq) => (
-                          <div key={pq.id} className="rounded-lg bg-slate-50 p-3.5 dark:bg-slate-800/50">
+                          <div
+                            key={pq.id}
+                            className="rounded-lg bg-slate-50 p-3.5 dark:bg-slate-800/50"
+                          >
                             <p className="text-xs font-semibold text-slate-900 dark:text-slate-100">
                               Q: {pq.question}
                             </p>
-                            <p className="mt-1 text-xs text-slate-500 italic">Hint: {pq.hint}</p>
+                            <p className="mt-1 text-xs text-slate-500 italic">
+                              Hint: {pq.hint}
+                            </p>
                           </div>
                         ))}
                       </div>
@@ -820,7 +1117,9 @@ export function AiPage() {
 
                     {/* Checklist */}
                     <div>
-                      <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Exam Readiness Checklist</h4>
+                      <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        Exam Readiness Checklist
+                      </h4>
                       <ul className="mt-2 space-y-2 text-xs text-slate-700 dark:text-slate-300">
                         {examPrepResult.checklist.map((item, idx) => (
                           <li key={idx} className="flex items-center gap-2">
@@ -839,7 +1138,8 @@ export function AiPage() {
                     Prepare For Exams
                   </h3>
                   <p className="mt-1 text-xs text-slate-500 max-w-sm">
-                    Select a registered exam to build a complete revision roadmap and practice question set.
+                    Select a registered exam to build a complete revision
+                    roadmap and practice question set.
                   </p>
                 </div>
               )}
@@ -856,7 +1156,8 @@ export function AiPage() {
                   Smart Academic Recommendations
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Computed live from your task completion rates, attendance thresholds, and exam schedules.
+                  Computed live from your task completion rates, attendance
+                  thresholds, and exam schedules.
                 </p>
               </div>
 
@@ -865,7 +1166,12 @@ export function AiPage() {
                 disabled={recommendationsLoading}
                 className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800"
               >
-                <RefreshCw className={cn("h-3.5 w-3.5", recommendationsLoading && "animate-spin")} />
+                <RefreshCw
+                  className={cn(
+                    "h-3.5 w-3.5",
+                    recommendationsLoading && "animate-spin",
+                  )}
+                />
                 <span>Refresh</span>
               </button>
             </div>
@@ -884,7 +1190,7 @@ export function AiPage() {
                             "rounded px-2 py-0.5 text-xs font-semibold",
                             rec.priority === "HIGH" || rec.priority === "URGENT"
                               ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"
-                              : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                              : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
                           )}
                         >
                           {rec.priority} PRIORITY

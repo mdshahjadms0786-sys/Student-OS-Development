@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { AuthUserSchema } from './auth.schema.js';
+import { z } from "zod";
+import { AuthUserSchema } from "./auth.schema.js";
 
 export const StudentProfileSchema = z.object({
   id: z.string(),
@@ -11,7 +11,6 @@ export const StudentProfileSchema = z.object({
   academicYear: z.string().nullable().optional(),
 });
 
-
 export const UpdateProfileRequestSchema = z.object({
   name: z.string().min(2).max(100).optional(),
   program: z.string().max(100).optional(),
@@ -19,10 +18,9 @@ export const UpdateProfileRequestSchema = z.object({
   section: z.string().max(20).optional(),
   batch: z.string().max(50).optional(),
   academicYear: z.string().max(50).optional(),
+  targetAttendance: z.number().min(0).max(100).optional(),
 });
-
 
 export const UserWithProfileSchema = AuthUserSchema.extend({
   profile: StudentProfileSchema.nullable().optional(),
 });
-

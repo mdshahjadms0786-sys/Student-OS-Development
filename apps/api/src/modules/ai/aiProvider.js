@@ -14,10 +14,16 @@ export class AiProviderService {
   /**
    * Helper to execute provider call with timeout protection & error handling
    */
-  async withTimeout(operation, fallbackReason = "AI service request timed out.") {
+  async withTimeout(
+    operation,
+    fallbackReason = "AI service request timed out.",
+  ) {
     let timer;
     const timeoutPromise = new Promise((_, reject) => {
-      timer = setTimeout(() => reject(new Error(fallbackReason)), this.timeoutMs);
+      timer = setTimeout(
+        () => reject(new Error(fallbackReason)),
+        this.timeoutMs,
+      );
     });
 
     try {
@@ -35,19 +41,24 @@ export class AiProviderService {
    */
   async generateStudyPlan(context) {
     return this.withTimeout(async () => {
-      const { exams, pendingTasks, timetable, studyHoursPerDay, days, targetSubjectName } = context;
+      const {
+        exams,
+        pendingTasks,
+        _timetable,
+        studyHoursPerDay,
+        days,
+        targetSubjectName,
+      } = context;
 
       const scheduleItems = [];
       const startDate = new Date();
+      let dayTaskIndex = 0;
 
       // Distribute study blocks over requested days
       for (let dayOffset = 0; dayOffset < days; dayOffset++) {
         const currentDate = new Date(startDate);
         currentDate.setDate(currentDate.getDate() + dayOffset);
         const dateStr = currentDate.toISOString().split("T")[0];
-
-        // Pick priority items: upcoming exams first, then pending tasks
-        let dayTaskIndex = 0;
 
         // Add exam revision block if exam exists
         if (exams && exams.length > dayOffset) {
@@ -71,7 +82,9 @@ export class AiProviderService {
           scheduleItems.push({
             id: `plan-item-${dayOffset}-task`,
             title: `Work on ${task.title}`,
-            description: task.description || `Complete priority ${task.priority} assignment before due date.`,
+            description:
+              task.description ||
+              `Complete priority ${task.priority} assignment before due date.`,
             subjectId: task.subjectId,
             subjectName: task.subject?.name || "General Academic",
             date: dateStr,
@@ -86,8 +99,11 @@ export class AiProviderService {
         if (scheduleItems.filter((i) => i.date === dateStr).length < 2) {
           scheduleItems.push({
             id: `plan-item-${dayOffset}-general`,
-            title: targetSubjectName ? `Deep Study: ${targetSubjectName}` : "General Core Subject Review",
-            description: "Review key concepts, solve practice problems, and summarize lecture notes.",
+            title: targetSubjectName
+              ? `Deep Study: ${targetSubjectName}`
+              : "General Core Subject Review",
+            description:
+              "Review key concepts, solve practice problems, and summarize lecture notes.",
             subjectId: context.targetSubjectId || null,
             subjectName: targetSubjectName || "Core Studies",
             date: dateStr,
@@ -98,7 +114,9 @@ export class AiProviderService {
         }
       }
 
-      const totalHours = (scheduleItems.reduce((acc, item) => acc + item.durationMinutes, 0) / 60).toFixed(1);
+      const totalHours = (
+        scheduleItems.reduce((acc, item) => acc + item.durationMinutes, 0) / 60
+      ).toFixed(1);
 
       return {
         isAiGenerated: true,
@@ -106,7 +124,8 @@ export class AiProviderService {
         planTitle: `Personalized ${days}-Day Study Roadmap`,
         reasoning: `Plan generated targeting ${exams?.length || 0} upcoming exam(s) and ${pendingTasks?.length || 0} active task(s). Distributed across ${days} days with ~${studyHoursPerDay} study hours/day limit (${totalHours} total scheduled hours).`,
         items: scheduleItems,
-        disclaimer: "AI-generated study suggestion. This plan will not modify your schedule until explicitly accepted.",
+        disclaimer:
+          "AI-generated study suggestion. This plan will not modify your schedule until explicitly accepted.",
       };
     });
   }
@@ -118,12 +137,17 @@ export class AiProviderService {
     return this.withTimeout(async () => {
       const qLower = question.toLowerCase();
 
-      let explanation = `Here is a structured explanation regarding your question: "${question}".`;
-      let examples = [];
-      let nextSteps = [];
+      let explanation;
+      let examples;
+      let nextSteps;
 
-      if (qLower.includes("binary") || qLower.includes("tree") || qLower.includes("data structure")) {
-        explanation = "A Binary Tree is a non-linear data structure where each node has at most two child nodes (left and right). Binary Search Trees (BST) maintain the property that left child values are smaller and right child values are larger than the parent node.";
+      if (
+        qLower.includes("binary") ||
+        qLower.includes("tree") ||
+        qLower.includes("data structure")
+      ) {
+        explanation =
+          "A Binary Tree is a non-linear data structure where each node has at most two child nodes (left and right). Binary Search Trees (BST) maintain the property that left child values are smaller and right child values are larger than the parent node.";
         examples = [
           "In-order traversal of a BST yields elements in sorted ascending order.",
           "Search time complexity is O(log n) in a balanced BST, but degrades to O(n) in a skewed tree.",
@@ -132,8 +156,13 @@ export class AiProviderService {
           "Practice implementing tree insertion and deletion algorithms.",
           "Study AVL trees and Red-Black trees for self-balancing concepts.",
         ];
-      } else if (qLower.includes("algorithm") || qLower.includes("complexity") || qLower.includes("big o")) {
-        explanation = "Big O notation measures the upper bound of an algorithm's time or space complexity relative to input size n. It describes efficiency during worst-case execution scenarios.";
+      } else if (
+        qLower.includes("algorithm") ||
+        qLower.includes("complexity") ||
+        qLower.includes("big o")
+      ) {
+        explanation =
+          "Big O notation measures the upper bound of an algorithm's time or space complexity relative to input size n. It describes efficiency during worst-case execution scenarios.";
         examples = [
           "O(1): Constant time (e.g., accessing an array index).",
           "O(n log n): Efficient sorting algorithms (e.g., Merge Sort, Quick Sort).",
@@ -167,7 +196,8 @@ export class AiProviderService {
         explanation,
         examples,
         nextSteps,
-        disclaimer: "AI-generated educational explanation. Refer to official course textbooks for authoritative answers.",
+        disclaimer:
+          "AI-generated educational explanation. Refer to official course textbooks for authoritative answers.",
       };
     });
   }
@@ -184,24 +214,31 @@ export class AiProviderService {
           isAiGenerated: true,
           provider: this.providerName,
           noteTitle: noteTitle || "Untitled Note",
-          summary: "Note content is empty or contains insufficient text for AI summarization.",
+          summary:
+            "Note content is empty or contains insufficient text for AI summarization.",
           keyPoints: ["No text content provided in note."],
-          revisionQuestions: ["Add lecture notes or text content to generate self-test questions."],
+          revisionQuestions: [
+            "Add lecture notes or text content to generate self-test questions.",
+          ],
           disclaimer: "AI summarizer requires valid note text.",
         };
       }
 
       // Extract paragraphs/lines for intelligent key points extraction
-      const lines = cleanContent.split("\n").map(l => l.trim()).filter(Boolean);
+      const lines = cleanContent
+        .split("\n")
+        .map((l) => l.trim())
+        .filter(Boolean);
       const firstLines = lines.slice(0, 3).join(" ");
 
-      const keyPoints = lines.length > 1 
-        ? lines.slice(0, 5).map(l => l.replace(/^[-*•]\s*/, ""))
-        : [
-            `Core focus: ${cleanContent.slice(0, 80)}...`,
-            "Important definitions and primary concepts highlighted in note.",
-            "Key takeaways for exam review.",
-          ];
+      const keyPoints =
+        lines.length > 1
+          ? lines.slice(0, 5).map((l) => l.replace(/^[-*•]\s*/, ""))
+          : [
+              `Core focus: ${cleanContent.slice(0, 80)}...`,
+              "Important definitions and primary concepts highlighted in note.",
+              "Key takeaways for exam review.",
+            ];
 
       return {
         isAiGenerated: true,
@@ -215,7 +252,8 @@ export class AiProviderService {
           `How do the key formulas or rules in this note apply to practical problems?`,
           `Can you explain the main takeaway without referencing your notes?`,
         ],
-        disclaimer: "AI-generated summary based solely on user-provided note text.",
+        disclaimer:
+          "AI-generated summary based solely on user-provided note text.",
       };
     });
   }
@@ -223,24 +261,36 @@ export class AiProviderService {
   /**
    * Generate exam revision plan and practice questions
    */
-  async generateExamPrep({ examTitle, subjectName, examDate, syllabus, progress }) {
+  async generateExamPrep({
+    examTitle,
+    subjectName,
+    examDate,
+    syllabus,
+    progress,
+  }) {
     return this.withTimeout(async () => {
-      const formattedDate = examDate ? new Date(examDate).toLocaleDateString() : "Upcoming Exam";
+      const formattedDate = examDate
+        ? new Date(examDate).toLocaleDateString()
+        : "Upcoming Exam";
 
       const revisionPlan = [
         {
           phase: "Phase 1: Core Syllabus Foundations",
-          details: syllabus ? `Review topics: ${syllabus.slice(0, 100)}...` : "Review fundamental subject concepts, lecture slides, and primary formulas.",
+          details: syllabus
+            ? `Review topics: ${syllabus.slice(0, 100)}...`
+            : "Review fundamental subject concepts, lecture slides, and primary formulas.",
           estimatedHours: 3,
         },
         {
           phase: "Phase 2: Practice & Problem Solving",
-          details: "Solve past paper questions, homework assignments, and self-test quizzes.",
+          details:
+            "Solve past paper questions, homework assignments, and self-test quizzes.",
           estimatedHours: 4,
         },
         {
           phase: "Phase 3: Final Mock Test & Formula Sheet Review",
-          details: "Timed practice exam simulation and quick review of tricky topics.",
+          details:
+            "Timed practice exam simulation and quick review of tricky topics.",
           estimatedHours: 2,
         },
       ];
@@ -281,7 +331,8 @@ export class AiProviderService {
         revisionPlan,
         practiceQuestions,
         checklist,
-        disclaimer: "AI-generated exam study guide. Does NOT represent official exam papers or university marks.",
+        disclaimer:
+          "AI-generated exam study guide. Does NOT represent official exam papers or university marks.",
       };
     });
   }
@@ -289,7 +340,12 @@ export class AiProviderService {
   /**
    * Compute smart recommendations from real academic data
    */
-  async getSmartRecommendations({ lowAttendanceSubjects, upcomingExams, overdueTasks, studyHoursThisWeek }) {
+  async getSmartRecommendations({
+    lowAttendanceSubjects,
+    upcomingExams,
+    overdueTasks,
+    studyHoursThisWeek,
+  }) {
     return this.withTimeout(async () => {
       const recommendations = [];
 
@@ -350,7 +406,8 @@ export class AiProviderService {
           type: "GENERAL",
           priority: "LOW",
           title: "Great Job! Academic Plan is On Track",
-          description: "All tasks are up to date and attendance is above target. Maintain your study routine!",
+          description:
+            "All tasks are up to date and attendance is above target. Maintain your study routine!",
           actionableLink: "#today",
         });
       }
@@ -359,7 +416,8 @@ export class AiProviderService {
         isAiGenerated: true,
         provider: this.providerName,
         recommendations,
-        disclaimer: "Actionable recommendations calculated from your live application data.",
+        disclaimer:
+          "Actionable recommendations calculated from your live application data.",
       };
     });
   }

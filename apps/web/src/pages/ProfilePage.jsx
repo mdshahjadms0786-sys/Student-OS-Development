@@ -1,20 +1,31 @@
-import * as React from 'react';
-import { useForm as useReactHookForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, Button, Input } from '@student-os/ui';
-import { Label } from '../components/ui/Label.jsx';
-import { apiClient } from '../lib/api-client.js';
-import { useAuth } from '../lib/auth-context.jsx';
-import { toast } from 'sonner';
-import { Spinner } from '../components/ui/Spinner.jsx';
-import { AppShell } from '../components/layout/AppShell.jsx';
-import { useRouter } from '../lib/router.jsx';
+import * as React from "react";
+import { useForm as useReactHookForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  Button,
+  Input,
+} from "@student-os/ui";
+import { Label } from "../components/ui/Label.jsx";
+import { apiClient } from "../lib/api-client.js";
+import { useAuth } from "../lib/auth-context.jsx";
+import { toast } from "sonner";
+import { Spinner } from "../components/ui/Spinner.jsx";
+import { AppShell } from "../components/layout/AppShell.jsx";
+import { useRouter } from "../lib/router.jsx";
 
 const ProfileSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  program: z.string().min(1, 'Program is required'),
-  semester: z.number().min(1).max(12),
+  name: z.string().optional(),
+  program: z.string().min(1, "Program is required"),
+  semester: z
+    .number({ invalid_type_error: "Semester is required" })
+    .min(1)
+    .max(12),
   section: z.string().optional(),
   batch: z.string().optional(),
   academicYear: z.string().optional(),
@@ -27,28 +38,55 @@ export function ProfilePage() {
   const [fetching, setFetching] = React.useState(true);
   const { currentPath, navigate } = useRouter();
 
-  const { register, handleSubmit, reset, formState: { errors } } = useReactHookForm({
-    resolver: zodResolver(ProfileSchema)
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useReactHookForm({
+    resolver: zodResolver(ProfileSchema),
+    defaultValues: {
+      name: user?.name || "",
+      program: "",
+      semester: 1,
+      section: "",
+      batch: "",
+      academicYear: "",
+      targetAttendance: 75,
+    },
   });
 
   React.useEffect(() => {
     async function fetchProfile() {
       try {
-        const res = await apiClient('/api/profile');
+        const res = await apiClient("/api/profile");
         if (res.success && res.data) {
           const { profile, name } = res.data;
-          reset({
-            name: name || user?.name || '',
-            program: profile?.program || '',
-            semester: profile?.semester || 1,
-            section: profile?.section || '',
-            batch: profile?.batch || '',
-            academicYear: profile?.academicYear || '',
-            targetAttendance: profile?.targetAttendance ?? 75,
-          });
+          if (profile) {
+            reset(
+              {
+                name: name || user?.name || "",
+                program: profile.program || "",
+                semester: profile.semester || 1,
+                section: profile.section || "",
+                batch: profile.batch || "",
+                academicYear: profile.academicYear || "",
+                targetAttendance: profile.targetAttendance ?? 75,
+              },
+              { keepDirtyValues: true }
+            );
+          } else if (name) {
+            reset(
+              (prev) => ({
+                ...prev,
+                name,
+              }),
+              { keepDirtyValues: true }
+            );
+          }
         }
       } catch {
-        toast.error('Could not load profile');
+        toast.error("Could not load profile");
       } finally {
         setFetching(false);
       }
@@ -59,34 +97,44 @@ export function ProfilePage() {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      const res = await apiClient('/api/profile', {
-        method: 'PATCH',
-        body: JSON.stringify(data),
+      const payload = {
+        ...data,
+        name:
+          data.name && data.name.trim()
+            ? data.name.trim()
+            : user?.name || undefined,
+      };
+      const res = await apiClient("/api/profile", {
+        method: "PATCH",
+        body: JSON.stringify(payload),
       });
       if (res.success && res.data) {
-        toast.success('Profile updated successfully');
+        toast.success("Profile updated successfully");
         if (user) {
           updateUser({
             ...user,
-            name: res.data.name || data.name,
+            name: res.data.name || payload.name || user.name,
             profile: res.data.profile,
             profileComplete: true,
           });
         }
-        window.location.hash = '#home';
+        window.location.hash = "#home";
       }
     } catch (err) {
-      toast.error(err.message || 'Failed to update profile');
+      toast.error(err.message || "Failed to update profile");
     } finally {
       setLoading(false);
     }
   };
 
-  if (fetching) return (
-    <AppShell user={user} currentPath={currentPath} onNavigate={navigate}>
-      <div className="flex justify-center p-12"><Spinner className="h-8 w-8" /></div>
-    </AppShell>
-  );
+  if (fetching)
+    return (
+      <AppShell user={user} currentPath={currentPath} onNavigate={navigate}>
+        <div className="flex justify-center p-12">
+          <Spinner className="h-8 w-8" />
+        </div>
+      </AppShell>
+    );
 
   return (
     <AppShell user={user} currentPath={currentPath} onNavigate={navigate}>
@@ -94,41 +142,89 @@ export function ProfilePage() {
         <Card>
           <CardHeader>
             <CardTitle>Complete Your Profile</CardTitle>
-            <CardDescription>Please provide your academic details to continue.</CardDescription>
+            <CardDescription>
+              Please provide your academic details to continue.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
-                  <Input id="name" error={!!errors.name} {...register('name')} />
-                  {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+                  <Input
+                    id="name"
+                    error={!!errors.name}
+                    {...register("name")}
+                  />
+                  {errors.name && (
+                    <p className="text-xs text-red-500">
+                      {errors.name.message}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="program">Program / Major</Label>
-                  <Input id="program" placeholder="e.g. Computer Science" error={!!errors.program} {...register('program')} />
-                  {errors.program && <p className="text-xs text-red-500">{errors.program.message}</p>}
+                  <Input
+                    id="program"
+                    placeholder="e.g. Computer Science"
+                    error={!!errors.program}
+                    {...register("program")}
+                  />
+                  {errors.program && (
+                    <p className="text-xs text-red-500">
+                      {errors.program.message}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="semester">Semester (1-12)</Label>
-                  <Input id="semester" type="number" error={!!errors.semester} {...register('semester', { valueAsNumber: true })} />
-                  {errors.semester && <p className="text-xs text-red-500">{errors.semester.message}</p>}
+                  <Input
+                    id="semester"
+                    type="number"
+                    error={!!errors.semester}
+                    {...register("semester", { valueAsNumber: true })}
+                  />
+                  {errors.semester && (
+                    <p className="text-xs text-red-500">
+                      {errors.semester.message}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="section">Section</Label>
-                  <Input id="section" error={!!errors.section} {...register('section')} />
+                  <Input
+                    id="section"
+                    error={!!errors.section}
+                    {...register("section")}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="batch">Batch</Label>
-                  <Input id="batch" placeholder="e.g. 2024" error={!!errors.batch} {...register('batch')} />
+                  <Input
+                    id="batch"
+                    placeholder="e.g. 2024"
+                    error={!!errors.batch}
+                    {...register("batch")}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="academicYear">Academic Year</Label>
-                  <Input id="academicYear" placeholder="e.g. 2023-2024" error={!!errors.academicYear} {...register('academicYear')} />
+                  <Input
+                    id="academicYear"
+                    placeholder="e.g. 2023-2024"
+                    error={!!errors.academicYear}
+                    {...register("academicYear")}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="targetAttendance">Target Attendance %</Label>
-                  <Input id="targetAttendance" type="number" defaultValue={75} error={!!errors.targetAttendance} {...register('targetAttendance', { valueAsNumber: true })} />
+                  <Input
+                    id="targetAttendance"
+                    type="number"
+                    defaultValue={75}
+                    error={!!errors.targetAttendance}
+                    {...register("targetAttendance", { valueAsNumber: true })}
+                  />
                 </div>
               </div>
               <Button type="submit" className="w-full mt-4" disabled={loading}>

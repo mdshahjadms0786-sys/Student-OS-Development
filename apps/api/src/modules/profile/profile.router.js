@@ -1,12 +1,12 @@
-import { Router } from 'express';
-import { requireAuth } from '../../middleware/auth-guard.js';
-import { ProfileService } from './profile.service.js';
-import { UpdateProfileRequestSchema } from '@student-os/contracts';
+import { Router } from "express";
+import { requireAuth } from "../../middleware/auth-guard.js";
+import { ProfileService } from "./profile.service.js";
+import { UpdateProfileRequestSchema } from "@student-os/contracts";
 
 export const profileRouter = Router();
 const profileService = new ProfileService();
 
-profileRouter.get('/', requireAuth, async (req, res, next) => {
+profileRouter.get("/", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user.id;
     const profile = await profileService.getProfile(userId);
@@ -16,7 +16,7 @@ profileRouter.get('/', requireAuth, async (req, res, next) => {
   }
 });
 
-profileRouter.patch('/', requireAuth, async (req, res, next) => {
+profileRouter.patch("/", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user.id;
     const data = UpdateProfileRequestSchema.parse(req.body);
