@@ -22,6 +22,7 @@ import {
   Award,
   FileText,
   BarChart3,
+  Sparkles,
 } from "lucide-react";
 import { AppShell } from "../components/layout/AppShell.jsx";
 import { useRouter } from "../lib/router.jsx";

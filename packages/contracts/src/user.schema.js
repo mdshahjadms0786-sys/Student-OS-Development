@@ -19,6 +19,7 @@ export const UpdateProfileRequestSchema = z.object({
   section: z.string().max(20).optional(),
   batch: z.string().max(50).optional(),
   academicYear: z.string().max(50).optional(),
+  targetAttendance: z.number().min(0).max(100).optional(),
 });
 
 

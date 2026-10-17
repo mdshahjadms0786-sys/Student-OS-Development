@@ -12,9 +12,9 @@ import { AppShell } from '../components/layout/AppShell.jsx';
 import { useRouter } from '../lib/router.jsx';
 
 const ProfileSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  name: z.string().optional(),
   program: z.string().min(1, 'Program is required'),
-  semester: z.number().min(1).max(12),
+  semester: z.number({ invalid_type_error: 'Semester is required' }).min(1).max(12),
   section: z.string().optional(),
   batch: z.string().optional(),
   academicYear: z.string().optional(),
@@ -28,7 +28,16 @@ export function ProfilePage() {
   const { currentPath, navigate } = useRouter();
 
   const { register, handleSubmit, reset, formState: { errors } } = useReactHookForm({
-    resolver: zodResolver(ProfileSchema)
+    resolver: zodResolver(ProfileSchema),
+    defaultValues: {
+      name: user?.name || '',
+      program: '',
+      semester: 1,
+      section: '',
+      batch: '',
+      academicYear: '',
+      targetAttendance: 75,
+    },
   });
 
   React.useEffect(() => {
@@ -59,16 +68,20 @@ export function ProfilePage() {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
+      const payload = {
+        ...data,
+        name: data.name && data.name.trim() ? data.name.trim() : (user?.name || undefined),
+      };
       const res = await apiClient('/api/profile', {
         method: 'PATCH',
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
       if (res.success && res.data) {
         toast.success('Profile updated successfully');
         if (user) {
           updateUser({
             ...user,
-            name: res.data.name || data.name,
+            name: res.data.name || payload.name || user.name,
             profile: res.data.profile,
             profileComplete: true,
           });
