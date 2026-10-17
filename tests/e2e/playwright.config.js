@@ -27,7 +27,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: "pnpm --filter @student-os/api dev",
+      command: "pnpm --filter @student-os/api start",
       url: "http://localhost:4000/api/health",
       reuseExistingServer: !process.env["CI"],
     },
