@@ -22,9 +22,9 @@ Thumbs.db
 .idea
 
 # Uploads / Storage
-uploads/
-storage/
-temp/
+/uploads/
+/storage/
+/temp/
 
 # Prisma SQLite dev (if used) or generated files
 *.db

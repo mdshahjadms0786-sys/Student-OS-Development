@@ -139,6 +139,77 @@ describe("Notes API", () => {
     expect(unauthorizedDelete.status).toBe(403);
   });
 
+  let uploadedAttachmentId;
+
+  it("POST /api/notes/:id/attachments uploads a binary file successfully", async () => {
+    const fileContent = Buffer.from("Sample lecture notes PDF content");
+    const res = await request(app)
+      .post(`/api/notes/${noteId}/attachments`)
+      .set("Cookie", cookie)
+      .attach("file", fileContent, {
+        filename: "lecture-slides.pdf",
+        contentType: "application/pdf",
+      });
+
+    expect(res.status).toBe(201);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.filename).toBe("lecture-slides.pdf");
+    expect(res.body.data.url).toContain(`/api/notes/${noteId}/attachments/`);
+    uploadedAttachmentId = res.body.data.id;
+  });
+
+  it("POST /api/notes/:id/attachments rejects unsupported file types", async () => {
+    const exeContent = Buffer.from("malicious executable content");
+    const res = await request(app)
+      .post(`/api/notes/${noteId}/attachments`)
+      .set("Cookie", cookie)
+      .attach("file", exeContent, {
+        filename: "script.exe",
+        contentType: "application/x-msdownload",
+      });
+
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toContain("Unsupported file type");
+  });
+
+  it("GET /api/notes/:id/attachments/:attachmentId/download downloads the file and enforces IDOR", async () => {
+    // Unauthorized user attempts download
+    const unauthRes = await request(app)
+      .get(`/api/notes/${noteId}/attachments/${uploadedAttachmentId}/download`)
+      .set("Cookie", user2Cookie);
+    expect(unauthRes.status).toBe(403);
+
+    // Authorized download
+    const res = await request(app)
+      .get(`/api/notes/${noteId}/attachments/${uploadedAttachmentId}/download`)
+      .set("Cookie", cookie);
+    expect(res.status).toBe(200);
+    expect(res.header["content-type"]).toContain("application/pdf");
+    expect(res.body.toString()).toBe("Sample lecture notes PDF content");
+  });
+
+  it("DELETE /api/notes/:id/attachments/:attachmentId deletes attachment and enforces IDOR", async () => {
+    // Unauthorized delete
+    const unauthRes = await request(app)
+      .delete(`/api/notes/${noteId}/attachments/${uploadedAttachmentId}`)
+      .set("Cookie", user2Cookie);
+    expect(unauthRes.status).toBe(403);
+
+    // Authorized delete
+    const res = await request(app)
+      .delete(`/api/notes/${noteId}/attachments/${uploadedAttachmentId}`)
+      .set("Cookie", cookie);
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+
+    // Verify it is gone
+    const checkRes = await request(app)
+      .get(`/api/notes/${noteId}/attachments/${uploadedAttachmentId}/download`)
+      .set("Cookie", cookie);
+    expect(checkRes.status).toBe(404);
+  });
+
   it("DELETE /api/notes/:id removes the note and its attachments", async () => {
     const res = await request(app)
       .delete(`/api/notes/${noteId}`)

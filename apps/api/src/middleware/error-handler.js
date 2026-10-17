@@ -39,6 +39,18 @@ export function errorHandler(err, req, res, _next) {
     return;
   }
 
+  if (err.name === 'MulterError') {
+    let message = err.message;
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      message = 'File size exceeds maximum limit of 10MB';
+    }
+    res.status(400).json({
+      success: false,
+      message,
+    });
+    return;
+  }
+
   const error = err;
   const isProd = process.env['NODE_ENV'] === 'production';
 
