@@ -1,8 +1,15 @@
-import * as React from 'react';
-import { Card, CardHeader, CardTitle, CardContent, Button, Badge } from '@student-os/ui';
-import { Spinner } from '../components/ui/Spinner.jsx';
-import { apiClient } from '../lib/api-client.js';
-import { toast } from 'sonner';
+import * as React from "react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Button,
+  Badge,
+} from "@student-os/ui";
+import { Spinner } from "../components/ui/Spinner.jsx";
+import { apiClient } from "../lib/api-client.js";
+import { toast } from "sonner";
 import {
   Bell,
   Check,
@@ -13,11 +20,11 @@ import {
   UserCheck,
   Sliders,
   ExternalLink,
-} from 'lucide-react';
-import { AppShell } from '../components/layout/AppShell.jsx';
-import { useRouter } from '../lib/router.jsx';
-import { useAuth } from '../lib/auth-context.jsx';
-import { format, parseISO } from 'date-fns';
+} from "lucide-react";
+import { AppShell } from "../components/layout/AppShell.jsx";
+import { useRouter } from "../lib/router.jsx";
+import { useAuth } from "../lib/auth-context.jsx";
+import { format, parseISO } from "date-fns";
 
 export function NotificationsPage() {
   const { user } = useAuth();
@@ -27,17 +34,17 @@ export function NotificationsPage() {
   const [preferences, setPreferences] = React.useState([]);
   const [unreadCount, setUnreadCount] = React.useState(0);
   const [loading, setLoading] = React.useState(true);
-  const [activeTab, setActiveTab] = React.useState('ALL');
+  const [activeTab, setActiveTab] = React.useState("ALL");
 
   const fetchNotifications = React.useCallback(async () => {
     try {
-      const res = await apiClient('/api/notifications');
+      const res = await apiClient("/api/notifications");
       if (res.success && res.data) {
         setNotifications(res.data.notifications);
         setUnreadCount(res.data.unreadCount);
       }
     } catch {
-      toast.error('Failed to load notifications');
+      toast.error("Failed to load notifications");
     } finally {
       setLoading(false);
     }
@@ -45,7 +52,7 @@ export function NotificationsPage() {
 
   const fetchPreferences = React.useCallback(async () => {
     try {
-      const res = await apiClient('/api/notification-preferences');
+      const res = await apiClient("/api/notification-preferences");
       if (res.success && res.data) {
         setPreferences(res.data);
       }
@@ -62,39 +69,43 @@ export function NotificationsPage() {
   const handleMarkAsRead = async (id) => {
     try {
       const res = await apiClient(`/api/notifications/${id}/read`, {
-        method: 'POST',
+        method: "POST",
       });
       if (res.success) {
         setNotifications((prev) =>
-          prev.map((n) => (n.id === id ? { ...n, readAt: new Date().toISOString() } : n))
+          prev.map((n) =>
+            n.id === id ? { ...n, readAt: new Date().toISOString() } : n,
+          ),
         );
         setUnreadCount((c) => Math.max(0, c - 1));
       }
     } catch {
-      toast.error('Failed to update notification');
+      toast.error("Failed to update notification");
     }
   };
 
   const handleMarkAllAsRead = async () => {
     try {
-      const res = await apiClient('/api/notifications/read-all', { method: 'POST' });
+      const res = await apiClient("/api/notifications/read-all", {
+        method: "POST",
+      });
       if (res.success) {
-        toast.success('All notifications marked as read');
+        toast.success("All notifications marked as read");
         setNotifications((prev) =>
-          prev.map((n) => ({ ...n, readAt: new Date().toISOString() }))
+          prev.map((n) => ({ ...n, readAt: new Date().toISOString() })),
         );
         setUnreadCount(0);
       }
     } catch {
-      toast.error('Failed to mark all as read');
+      toast.error("Failed to mark all as read");
     }
   };
 
   const handleTogglePreference = async (pref) => {
     const newEnabled = !pref.enabled;
     try {
-      const res = await apiClient('/api/notification-preferences', {
-        method: 'PATCH',
+      const res = await apiClient("/api/notification-preferences", {
+        method: "PATCH",
         body: JSON.stringify({
           type: pref.type,
           enabled: newEnabled,
@@ -102,19 +113,21 @@ export function NotificationsPage() {
       });
       if (res.success && res.data) {
         setPreferences((prev) =>
-          prev.map((p) => (p.type === pref.type ? res.data : p))
+          prev.map((p) => (p.type === pref.type ? res.data : p)),
         );
-        toast.success(`${pref.type} notifications ${newEnabled ? 'enabled' : 'disabled'}`);
+        toast.success(
+          `${pref.type} notifications ${newEnabled ? "enabled" : "disabled"}`,
+        );
       }
     } catch {
-      toast.error('Failed to update preference');
+      toast.error("Failed to update preference");
     }
   };
 
   const handleUpdateTiming = async (pref, timingMinutes) => {
     try {
-      const res = await apiClient('/api/notification-preferences', {
-        method: 'PATCH',
+      const res = await apiClient("/api/notification-preferences", {
+        method: "PATCH",
         body: JSON.stringify({
           type: pref.type,
           timingMinutes,
@@ -122,30 +135,30 @@ export function NotificationsPage() {
       });
       if (res.success && res.data) {
         setPreferences((prev) =>
-          prev.map((p) => (p.type === pref.type ? res.data : p))
+          prev.map((p) => (p.type === pref.type ? res.data : p)),
         );
         toast.success(`Timing updated for ${pref.type}`);
       }
     } catch {
-      toast.error('Failed to update reminder timing');
+      toast.error("Failed to update reminder timing");
     }
   };
 
   const filteredNotifications = notifications.filter((n) => {
-    if (activeTab === 'UNREAD') return !n.readAt;
+    if (activeTab === "UNREAD") return !n.readAt;
     return true;
   });
 
   const getNotificationIcon = (type) => {
     switch (type) {
-      case 'CLASS':
+      case "CLASS":
         return <Clock className="h-4 w-4 text-emerald-600" />;
-      case 'ASSIGNMENT':
-      case 'TASK':
+      case "ASSIGNMENT":
+      case "TASK":
         return <CheckSquare className="h-4 w-4 text-blue-600" />;
-      case 'EXAM':
+      case "EXAM":
         return <Award className="h-4 w-4 text-purple-600" />;
-      case 'ATTENDANCE':
+      case "ATTENDANCE":
         return <UserCheck className="h-4 w-4 text-amber-600" />;
       default:
         return <Bell className="h-4 w-4 text-slate-600" />;
@@ -154,11 +167,11 @@ export function NotificationsPage() {
 
   const getDeepLink = (notif) => {
     switch (notif.type) {
-      case 'TASK':
-      case 'ASSIGNMENT':
-        return { label: 'Go to Tasks', path: '#tasks' };
-      case 'CLASS':
-        return { label: 'Go to Timetable', path: '#timetable' };
+      case "TASK":
+      case "ASSIGNMENT":
+        return { label: "Go to Tasks", path: "#tasks" };
+      case "CLASS":
+        return { label: "Go to Timetable", path: "#timetable" };
       default:
         return null;
     }
@@ -184,7 +197,12 @@ export function NotificationsPage() {
         </div>
 
         {unreadCount > 0 && (
-          <Button variant="outline" size="sm" onClick={handleMarkAllAsRead} className="gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleMarkAllAsRead}
+            className="gap-2"
+          >
             <CheckCheck className="h-4 w-4" />
             <span>Mark All as Read</span>
           </Button>
@@ -195,33 +213,33 @@ export function NotificationsPage() {
       <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 mb-6">
         <button
           type="button"
-          onClick={() => setActiveTab('ALL')}
+          onClick={() => setActiveTab("ALL")}
           className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-            activeTab === 'ALL'
-              ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-              : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+            activeTab === "ALL"
+              ? "border-blue-600 text-blue-600 dark:text-blue-400"
+              : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
           }`}
         >
           All ({notifications.length})
         </button>
         <button
           type="button"
-          onClick={() => setActiveTab('UNREAD')}
+          onClick={() => setActiveTab("UNREAD")}
           className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-            activeTab === 'UNREAD'
-              ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-              : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+            activeTab === "UNREAD"
+              ? "border-blue-600 text-blue-600 dark:text-blue-400"
+              : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
           }`}
         >
           Unread ({unreadCount})
         </button>
         <button
           type="button"
-          onClick={() => setActiveTab('PREFERENCES')}
+          onClick={() => setActiveTab("PREFERENCES")}
           className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors flex items-center gap-1.5 ${
-            activeTab === 'PREFERENCES'
-              ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-              : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+            activeTab === "PREFERENCES"
+              ? "border-blue-600 text-blue-600 dark:text-blue-400"
+              : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
           }`}
         >
           <Sliders className="h-3.5 w-3.5" />
@@ -234,20 +252,24 @@ export function NotificationsPage() {
         <div className="flex justify-center p-12">
           <Spinner className="h-8 w-8" />
         </div>
-      ) : activeTab === 'PREFERENCES' ? (
+      ) : activeTab === "PREFERENCES" ? (
         <Card className="max-w-2xl">
           <CardHeader>
             <CardTitle className="text-lg">Reminder Preferences</CardTitle>
             <p className="text-sm text-slate-500">
-              Customize which notifications you receive and reminder advance lead times.
+              Customize which notifications you receive and reminder advance
+              lead times.
             </p>
           </CardHeader>
           <CardContent className="divide-y divide-slate-100 dark:divide-slate-800">
             {preferences.map((pref) => (
-              <div key={pref.id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div
+                key={pref.id}
+                className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+              >
                 <div className="space-y-0.5">
                   <span className="font-semibold text-sm text-slate-900 dark:text-white capitalize">
-                    {pref.type.toLowerCase().replace('_', ' ')} Notifications
+                    {pref.type.toLowerCase().replace("_", " ")} Notifications
                   </span>
                   <p className="text-xs text-slate-500">
                     Receive alert reminders before deadlines and schedules.
@@ -260,7 +282,9 @@ export function NotificationsPage() {
                       aria-label="Reminder Timing"
                       className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs dark:border-slate-800 dark:bg-slate-900"
                       value={pref.timingMinutes}
-                      onChange={(e) => handleUpdateTiming(pref, Number(e.target.value))}
+                      onChange={(e) =>
+                        handleUpdateTiming(pref, Number(e.target.value))
+                      }
                     >
                       <option value={5}>5 mins before</option>
                       <option value={15}>15 mins before</option>
@@ -276,12 +300,14 @@ export function NotificationsPage() {
                     aria-checked={pref.enabled}
                     onClick={() => handleTogglePreference(pref)}
                     className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                      pref.enabled ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'
+                      pref.enabled
+                        ? "bg-blue-600"
+                        : "bg-slate-300 dark:bg-slate-700"
                     }`}
                   >
                     <span
                       className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                        pref.enabled ? 'translate-x-5' : 'translate-x-0'
+                        pref.enabled ? "translate-x-5" : "translate-x-0"
                       }`}
                     />
                   </button>
@@ -299,10 +325,13 @@ export function NotificationsPage() {
               </div>
             </div>
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-              {activeTab === 'UNREAD' ? 'No unread notifications' : 'No notifications yet'}
+              {activeTab === "UNREAD"
+                ? "No unread notifications"
+                : "No notifications yet"}
             </h3>
             <p className="text-sm text-slate-500 max-w-sm mx-auto">
-              You are all caught up! Academic alerts, upcoming classes, and task reminders will appear here.
+              You are all caught up! Academic alerts, upcoming classes, and task
+              reminders will appear here.
             </p>
           </CardContent>
         </Card>
@@ -316,8 +345,8 @@ export function NotificationsPage() {
                 key={notif.id}
                 className={`transition-all ${
                   isUnread
-                    ? 'border-blue-200 bg-blue-50/20 dark:border-blue-900/40 dark:bg-blue-950/10'
-                    : 'opacity-85'
+                    ? "border-blue-200 bg-blue-50/20 dark:border-blue-900/40 dark:bg-blue-950/10"
+                    : "opacity-85"
                 }`}
               >
                 <CardContent className="p-4 flex items-start justify-between gap-4">
@@ -344,7 +373,12 @@ export function NotificationsPage() {
                       </p>
 
                       <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-slate-400">
-                        <span>{format(parseISO(notif.createdAt), 'MMM d, yyyy h:mm a')}</span>
+                        <span>
+                          {format(
+                            parseISO(notif.createdAt),
+                            "MMM d, yyyy h:mm a",
+                          )}
+                        </span>
 
                         {link && (
                           <button

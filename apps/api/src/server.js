@@ -1,5 +1,5 @@
-import { createApp } from './app.js';
-import { env } from './config/env.js';
+import { createApp } from "./app.js";
+import { env } from "./config/env.js";
 
 const app = createApp();
 
@@ -13,16 +13,16 @@ const server = app.listen(env.PORT, () => {
 });
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM signal received: closing HTTP server');
+process.on("SIGTERM", () => {
+  console.log("SIGTERM signal received: closing HTTP server");
   server.close(() => {
-    console.log('HTTP server closed');
+    console.log("HTTP server closed");
   });
 });
 
-process.on('SIGINT', () => {
-  console.log('SIGINT signal received: closing HTTP server');
+process.on("SIGINT", () => {
+  console.log("SIGINT signal received: closing HTTP server");
   server.close(() => {
-    console.log('HTTP server closed');
+    console.log("HTTP server closed");
   });
 });

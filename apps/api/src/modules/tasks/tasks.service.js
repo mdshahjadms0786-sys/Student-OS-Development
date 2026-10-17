@@ -1,6 +1,6 @@
-import { prisma } from '@student-os/database';
-import { AppError } from '../../middleware/error-handler.js';
-import { NotificationsService } from '../notifications/notifications.service.js';
+import { prisma } from "@student-os/database";
+import { AppError } from "../../middleware/error-handler.js";
+import { NotificationsService } from "../notifications/notifications.service.js";
 
 export class TasksService {
   constructor() {
@@ -11,8 +11,8 @@ export class TasksService {
     const where = { userId };
 
     if (filters?.status) {
-      if (filters.status === 'OVERDUE') {
-        where.status = { in: ['TODO', 'IN_PROGRESS'] };
+      if (filters.status === "OVERDUE") {
+        where.status = { in: ["TODO", "IN_PROGRESS"] };
         where.dueAt = { lt: new Date() };
       } else {
         where.status = filters.status;
@@ -34,7 +34,7 @@ export class TasksService {
     if (filters?.search) {
       where.title = {
         contains: filters.search,
-        mode: 'insensitive',
+        mode: "insensitive",
       };
     }
 
@@ -51,14 +51,14 @@ export class TasksService {
     const tasks = await prisma.task.findMany({
       where,
       include: { subject: true },
-      orderBy: { dueAt: 'asc' },
+      orderBy: { dueAt: "asc" },
     });
 
     const now = new Date();
     // Dynamically mark overdue tasks if status is TODO or IN_PROGRESS and dueAt < now
     return tasks.map((task) => {
       if (
-        (task.status === 'TODO' || task.status === 'IN_PROGRESS') &&
+        (task.status === "TODO" || task.status === "IN_PROGRESS") &&
         new Date(task.dueAt) < now
       ) {
         return { ...task, isOverdue: true };
@@ -74,11 +74,11 @@ export class TasksService {
     });
 
     if (!task) {
-      throw new AppError('Task not found', 404);
+      throw new AppError("Task not found", 404);
     }
 
     if (task.userId !== userId) {
-      throw new AppError('Unauthorized', 403);
+      throw new AppError("Unauthorized", 403);
     }
 
     return task;
@@ -90,13 +90,13 @@ export class TasksService {
         where: { id: data.subjectId, userId },
       });
       if (!subject) {
-        throw new AppError('Subject not found or does not belong to user', 400);
+        throw new AppError("Subject not found or does not belong to user", 400);
       }
     }
 
     const dueAtDate = new Date(data.dueAt);
     if (isNaN(dueAtDate.getTime())) {
-      throw new AppError('Invalid due date', 400);
+      throw new AppError("Invalid due date", 400);
     }
 
     const task = await prisma.task.create({
@@ -105,9 +105,9 @@ export class TasksService {
         title: data.title,
         description: data.description ?? null,
         dueAt: dueAtDate,
-        priority: data.priority ?? 'MEDIUM',
-        category: data.category ?? 'ASSIGNMENT',
-        status: data.status ?? 'TODO',
+        priority: data.priority ?? "MEDIUM",
+        category: data.category ?? "ASSIGNMENT",
+        status: data.status ?? "TODO",
         subjectId: data.subjectId ?? null,
       },
       include: { subject: true },
@@ -131,18 +131,19 @@ export class TasksService {
         where: { id: data.subjectId, userId },
       });
       if (!subject) {
-        throw new AppError('Subject not found or does not belong to user', 400);
+        throw new AppError("Subject not found or does not belong to user", 400);
       }
     }
 
     const updateData = {};
     if (data.title !== undefined) updateData.title = data.title;
-    if (data.description !== undefined) updateData.description = data.description;
+    if (data.description !== undefined)
+      updateData.description = data.description;
     if (data.subjectId !== undefined) updateData.subjectId = data.subjectId;
     if (data.dueAt !== undefined) {
       const d = new Date(data.dueAt);
       if (isNaN(d.getTime())) {
-        throw new AppError('Invalid due date', 400);
+        throw new AppError("Invalid due date", 400);
       }
       updateData.dueAt = d;
     }
@@ -150,13 +151,17 @@ export class TasksService {
     if (data.category !== undefined) updateData.category = data.category;
     if (data.status !== undefined) {
       updateData.status = data.status;
-      if (data.status === 'COMPLETED') {
-        updateData.completedAt = data.completedAt ? new Date(data.completedAt) : new Date();
+      if (data.status === "COMPLETED") {
+        updateData.completedAt = data.completedAt
+          ? new Date(data.completedAt)
+          : new Date();
       } else {
         updateData.completedAt = null;
       }
     } else if (data.completedAt !== undefined) {
-      updateData.completedAt = data.completedAt ? new Date(data.completedAt) : null;
+      updateData.completedAt = data.completedAt
+        ? new Date(data.completedAt)
+        : null;
     }
 
     const updatedTask = await prisma.task.update({
@@ -186,12 +191,12 @@ export class TasksService {
 
   async toggleComplete(id, userId) {
     const task = await this.getTask(id, userId);
-    const isCompleted = task.status === 'COMPLETED';
+    const isCompleted = task.status === "COMPLETED";
 
     const updated = await prisma.task.update({
       where: { id },
       data: {
-        status: isCompleted ? 'TODO' : 'COMPLETED',
+        status: isCompleted ? "TODO" : "COMPLETED",
         completedAt: isCompleted ? null : new Date(),
       },
       include: { subject: true },

@@ -1,11 +1,11 @@
-import { Router } from 'express';
-import { requireAuth } from '../../middleware/auth-guard.js';
-import { DashboardService } from './dashboard.service.js';
+import { Router } from "express";
+import { requireAuth } from "../../middleware/auth-guard.js";
+import { DashboardService } from "./dashboard.service.js";
 
 export const dashboardRouter = Router();
 const dashboardService = new DashboardService();
 
-dashboardRouter.get('/summary', requireAuth, async (req, res, next) => {
+dashboardRouter.get("/summary", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user.id;
     const summary = await dashboardService.getSummary(userId);

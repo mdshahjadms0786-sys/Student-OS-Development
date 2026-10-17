@@ -1,15 +1,19 @@
-import { Router } from 'express';
-import { requireAuth } from '../../middleware/auth-guard.js';
-import { TasksService } from './tasks.service.js';
-import { CreateTaskRequestSchema, UpdateTaskRequestSchema } from '@student-os/contracts';
+import { Router } from "express";
+import { requireAuth } from "../../middleware/auth-guard.js";
+import { TasksService } from "./tasks.service.js";
+import {
+  CreateTaskRequestSchema,
+  UpdateTaskRequestSchema,
+} from "@student-os/contracts";
 
 export const tasksRouter = Router();
 const tasksService = new TasksService();
 
-tasksRouter.get('/', requireAuth, async (req, res, next) => {
+tasksRouter.get("/", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { status, priority, category, subjectId, search, from, to } = req.query;
+    const { status, priority, category, subjectId, search, from, to } =
+      req.query;
 
     const tasks = await tasksService.listTasks(userId, {
       status,
@@ -27,7 +31,7 @@ tasksRouter.get('/', requireAuth, async (req, res, next) => {
   }
 });
 
-tasksRouter.get('/:id', requireAuth, async (req, res, next) => {
+tasksRouter.get("/:id", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user.id;
     const task = await tasksService.getTask(req.params.id, userId);
@@ -37,7 +41,7 @@ tasksRouter.get('/:id', requireAuth, async (req, res, next) => {
   }
 });
 
-tasksRouter.post('/', requireAuth, async (req, res, next) => {
+tasksRouter.post("/", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user.id;
     const data = CreateTaskRequestSchema.parse(req.body);
@@ -48,7 +52,7 @@ tasksRouter.post('/', requireAuth, async (req, res, next) => {
   }
 });
 
-tasksRouter.patch('/:id', requireAuth, async (req, res, next) => {
+tasksRouter.patch("/:id", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user.id;
     const data = UpdateTaskRequestSchema.parse(req.body);
@@ -59,17 +63,17 @@ tasksRouter.patch('/:id', requireAuth, async (req, res, next) => {
   }
 });
 
-tasksRouter.delete('/:id', requireAuth, async (req, res, next) => {
+tasksRouter.delete("/:id", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user.id;
     await tasksService.deleteTask(req.params.id, userId);
-    res.json({ success: true, message: 'Task deleted successfully' });
+    res.json({ success: true, message: "Task deleted successfully" });
   } catch (error) {
     next(error);
   }
 });
 
-tasksRouter.post('/:id/complete', requireAuth, async (req, res, next) => {
+tasksRouter.post("/:id/complete", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user.id;
     const task = await tasksService.toggleComplete(req.params.id, userId);

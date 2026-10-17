@@ -115,7 +115,7 @@ export function NotesPage() {
     try {
       const res = await apiClient(
         `/api/notes/${noteId}/attachments/${attachmentId}`,
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
       if (res.success) {
         toast.success("Attachment removed");

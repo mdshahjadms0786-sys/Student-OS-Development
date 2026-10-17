@@ -1,11 +1,11 @@
-import { prisma } from '@student-os/database';
-import { AppError } from '../../middleware/error-handler.js';
+import { prisma } from "@student-os/database";
+import { AppError } from "../../middleware/error-handler.js";
 
 export class TimetableService {
   parseTime(time) {
-    const parts = time.split(':');
-    const hours = Number(parts[0] ?? '0');
-    const minutes = Number(parts[1] ?? '0');
+    const parts = time.split(":");
+    const hours = Number(parts[0] ?? "0");
+    const minutes = Number(parts[1] ?? "0");
     return hours * 60 + minutes;
   }
 
@@ -14,7 +14,7 @@ export class TimetableService {
     const endMin = this.parseTime(endTime);
 
     if (startMin >= endMin) {
-      throw new AppError('Start time must be before end time', 400);
+      throw new AppError("Start time must be before end time", 400);
     }
 
     const existingEntries = await prisma.timetableEntry.findMany({
@@ -30,7 +30,7 @@ export class TimetableService {
       const eEnd = this.parseTime(entry.endTime);
 
       if (startMin < eEnd && endMin > eStart) {
-        throw new AppError('Time conflict with existing timetable entry', 409);
+        throw new AppError("Time conflict with existing timetable entry", 409);
       }
     }
   }
@@ -42,10 +42,7 @@ export class TimetableService {
         ...(dayOfWeek !== undefined ? { dayOfWeek } : {}),
       },
       include: { subject: true },
-      orderBy: [
-        { dayOfWeek: 'asc' },
-        { startTime: 'asc' },
-      ],
+      orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }],
     });
     return entries;
   }
@@ -55,16 +52,21 @@ export class TimetableService {
       where: { id },
       include: { subject: true },
     });
-    
-    if (!entry) throw new AppError('Timetable entry not found', 404);
-    if (entry.userId !== userId) throw new AppError('Forbidden', 403);
-    
+
+    if (!entry) throw new AppError("Timetable entry not found", 404);
+    if (entry.userId !== userId) throw new AppError("Forbidden", 403);
+
     return entry;
   }
 
   async createEntry(userId, data) {
-    await this.checkOverlap(userId, data.dayOfWeek, data.startTime, data.endTime);
-    
+    await this.checkOverlap(
+      userId,
+      data.dayOfWeek,
+      data.startTime,
+      data.endTime,
+    );
+
     const entry = await prisma.timetableEntry.create({
       data: {
         userId,
@@ -85,17 +87,21 @@ export class TimetableService {
     const existing = await prisma.timetableEntry.findUnique({
       where: { id },
     });
-    if (!existing) throw new AppError('Timetable entry not found', 404);
-    if (existing.userId !== userId) throw new AppError('Forbidden', 403);
-    
+    if (!existing) throw new AppError("Timetable entry not found", 404);
+    if (existing.userId !== userId) throw new AppError("Forbidden", 403);
+
     const dayOfWeek = data.dayOfWeek ?? existing.dayOfWeek;
     const startTime = data.startTime ?? existing.startTime;
     const endTime = data.endTime ?? existing.endTime;
 
-    if (data.dayOfWeek !== undefined || data.startTime !== undefined || data.endTime !== undefined) {
+    if (
+      data.dayOfWeek !== undefined ||
+      data.startTime !== undefined ||
+      data.endTime !== undefined
+    ) {
       await this.checkOverlap(userId, dayOfWeek, startTime, endTime, id);
     }
-    
+
     const entry = await prisma.timetableEntry.update({
       where: { id },
       data: {
@@ -117,16 +123,16 @@ export class TimetableService {
       where: { id },
       select: { id: true, userId: true },
     });
-    if (!entry) throw new AppError('Timetable entry not found', 404);
-    if (entry.userId !== userId) throw new AppError('Forbidden', 403);
-    
+    if (!entry) throw new AppError("Timetable entry not found", 404);
+    if (entry.userId !== userId) throw new AppError("Forbidden", 403);
+
     await prisma.timetableEntry.delete({
       where: { id },
     });
-    
+
     return { id };
   }
-  
+
   async getTodayEntries(userId, dayOfWeek) {
     return this.listEntries(userId, dayOfWeek);
   }

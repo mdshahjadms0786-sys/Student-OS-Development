@@ -1,16 +1,18 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import fs from "node:fs/promises";
+import path from "node:path";
 
 export class LocalStorageAdapter {
-  constructor(baseDir = './uploads') {
+  constructor(baseDir = "./uploads") {
     this.baseDir = path.resolve(process.cwd(), baseDir);
   }
 
   _resolveSafePath(storageKey) {
     const safePath = path.resolve(this.baseDir, storageKey);
-    const baseWithSep = this.baseDir.endsWith(path.sep) ? this.baseDir : this.baseDir + path.sep;
+    const baseWithSep = this.baseDir.endsWith(path.sep)
+      ? this.baseDir
+      : this.baseDir + path.sep;
     if (safePath !== this.baseDir && !safePath.startsWith(baseWithSep)) {
-      throw new Error('Invalid storage path');
+      throw new Error("Invalid storage path");
     }
     return safePath;
   }
@@ -19,13 +21,18 @@ export class LocalStorageAdapter {
     await fs.mkdir(dirPath, { recursive: true });
   }
 
-  async uploadFile(file, directory = 'general') {
+  async uploadFile(file, directory = "general") {
     const safeDir = this._resolveSafePath(directory);
     await this.ensureDir(safeDir);
 
     const safeTimestamp = Date.now();
-    const cleanFilename = path.basename(file.filename).replace(/[^a-zA-Z0-9.-]/g, '_');
-    const storageKey = path.posix.join(directory.replace(/\\/g, '/'), `${safeTimestamp}-${cleanFilename}`);
+    const cleanFilename = path
+      .basename(file.filename)
+      .replace(/[^a-zA-Z0-9.-]/g, "_");
+    const storageKey = path.posix.join(
+      directory.replace(/\\/g, "/"),
+      `${safeTimestamp}-${cleanFilename}`,
+    );
     const fullPath = this._resolveSafePath(storageKey);
 
     await fs.writeFile(fullPath, file.buffer);
@@ -55,14 +62,16 @@ export class LocalStorageAdapter {
 }
 
 // Storage Factory
-export function createStorageAdapter(driver, basePath = './uploads') {
+export function createStorageAdapter(driver, basePath = "./uploads") {
   switch (driver) {
-    case 'local':
+    case "local":
       return new LocalStorageAdapter(basePath);
-    case 's3':
-    case 'r2':
+    case "s3":
+    case "r2":
       // Architecture prepared for cloud storage drivers
-      throw new Error(`Storage driver ${driver} requires production S3/R2 configuration`);
+      throw new Error(
+        `Storage driver ${driver} requires production S3/R2 configuration`,
+      );
     default:
       return new LocalStorageAdapter(basePath);
   }

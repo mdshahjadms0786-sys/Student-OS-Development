@@ -1,6 +1,6 @@
-import bcrypt from 'bcryptjs';
-import { prisma, Role } from '@student-os/database';
-import { AppError } from '../../middleware/error-handler.js';
+import bcrypt from "bcryptjs";
+import { prisma, Role } from "@student-os/database";
+import { AppError } from "../../middleware/error-handler.js";
 
 export class AuthService {
   async register(data) {
@@ -9,7 +9,10 @@ export class AuthService {
     });
 
     if (existing) {
-      throw new AppError('An account with this email address already exists', 409);
+      throw new AppError(
+        "An account with this email address already exists",
+        409,
+      );
     }
 
     const salt = await bcrypt.genSalt(12);
@@ -20,7 +23,7 @@ export class AuthService {
         email: data.email.toLowerCase(),
         passwordHash,
         name: data.name,
-        role: Role ? Role.STUDENT : 'STUDENT',
+        role: Role ? Role.STUDENT : "STUDENT",
         profile: {
           create: {},
         },
@@ -48,12 +51,12 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new AppError('Invalid email or password', 401);
+      throw new AppError("Invalid email or password", 401);
     }
 
     const isMatch = await bcrypt.compare(data.password, user.passwordHash);
     if (!isMatch) {
-      throw new AppError('Invalid email or password', 401);
+      throw new AppError("Invalid email or password", 401);
     }
 
     return {
@@ -82,7 +85,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new AppError('User not found', 404);
+      throw new AppError("User not found", 404);
     }
 
     return user;

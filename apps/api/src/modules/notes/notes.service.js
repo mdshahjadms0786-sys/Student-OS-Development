@@ -3,13 +3,21 @@ import { AppError } from "../../middleware/error-handler.js";
 import { createStorageAdapter } from "../../storage/storage-adapter.js";
 import { env } from "../../config/env.js";
 
-const storage = createStorageAdapter(env.STORAGE_DRIVER || "local", env.STORAGE_LOCAL_PATH || "./uploads");
+const storage = createStorageAdapter(
+  env.STORAGE_DRIVER || "local",
+  env.STORAGE_LOCAL_PATH || "./uploads",
+);
 
 function formatAttachment(att, noteId) {
-  const isUrl = att.storageKey && (att.storageKey.startsWith("http://") || att.storageKey.startsWith("https://"));
+  const isUrl =
+    att.storageKey &&
+    (att.storageKey.startsWith("http://") ||
+      att.storageKey.startsWith("https://"));
   return {
     ...att,
-    url: isUrl ? att.storageKey : `/api/notes/${noteId}/attachments/${att.id}/download`,
+    url: isUrl
+      ? att.storageKey
+      : `/api/notes/${noteId}/attachments/${att.id}/download`,
   };
 }
 
@@ -58,7 +66,7 @@ export class NotesService {
     return notes.map((note) => ({
       ...note,
       attachments: (attachmentsByNoteId.get(note.id) || []).map((att) =>
-        formatAttachment(att, note.id)
+        formatAttachment(att, note.id),
       ),
     }));
   }
@@ -132,7 +140,7 @@ export class NotesService {
     return {
       ...note,
       attachments: createdAttachments.map((att) =>
-        formatAttachment(att, note.id)
+        formatAttachment(att, note.id),
       ),
     };
   }
@@ -255,7 +263,7 @@ export class NotesService {
         size: file.size,
         mimeType: file.mimetype || "application/octet-stream",
       },
-      `notes/${noteId}`
+      `notes/${noteId}`,
     );
 
     const attachment = await prisma.attachment.create({
@@ -280,7 +288,11 @@ export class NotesService {
       where: { id: attachmentId },
     });
 
-    if (!attachment || attachment.userId !== userId || attachment.entityId !== noteId) {
+    if (
+      !attachment ||
+      attachment.userId !== userId ||
+      attachment.entityId !== noteId
+    ) {
       throw new AppError("Attachment not found or unauthorized", 404);
     }
 
@@ -310,7 +322,11 @@ export class NotesService {
       where: { id: attachmentId },
     });
 
-    if (!attachment || attachment.userId !== userId || attachment.entityId !== noteId) {
+    if (
+      !attachment ||
+      attachment.userId !== userId ||
+      attachment.entityId !== noteId
+    ) {
       throw new AppError("Attachment not found or unauthorized", 404);
     }
 
@@ -321,7 +337,7 @@ export class NotesService {
     ) {
       throw new AppError(
         "Attachment is an external link, not a downloadable file",
-        400
+        400,
       );
     }
 

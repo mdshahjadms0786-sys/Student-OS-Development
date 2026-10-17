@@ -1,22 +1,28 @@
-import { Router } from 'express';
-import { requireAuth } from '../../middleware/auth-guard.js';
-import { TimetableService } from './timetable.service.js';
-import { CreateTimetableEntryRequestSchema, UpdateTimetableEntryRequestSchema } from '@student-os/contracts';
+import { Router } from "express";
+import { requireAuth } from "../../middleware/auth-guard.js";
+import { TimetableService } from "./timetable.service.js";
+import {
+  CreateTimetableEntryRequestSchema,
+  UpdateTimetableEntryRequestSchema,
+} from "@student-os/contracts";
 
 export const timetableRouter = Router();
 const timetableService = new TimetableService();
 
-timetableRouter.get('/', requireAuth, async (req, res, next) => {
+timetableRouter.get("/", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user.id;
     const dayQuery = req.query.dayOfWeek;
     const dayOfWeek = dayQuery ? parseInt(dayQuery, 10) : undefined;
-    
-    if (dayOfWeek !== undefined && (isNaN(dayOfWeek) || dayOfWeek < 1 || dayOfWeek > 7)) {
-      res.status(400).json({ success: false, message: 'Invalid dayOfWeek' });
+
+    if (
+      dayOfWeek !== undefined &&
+      (isNaN(dayOfWeek) || dayOfWeek < 1 || dayOfWeek > 7)
+    ) {
+      res.status(400).json({ success: false, message: "Invalid dayOfWeek" });
       return;
     }
-    
+
     const entries = await timetableService.listEntries(userId, dayOfWeek);
     res.json({ success: true, data: entries });
   } catch (error) {
@@ -24,7 +30,7 @@ timetableRouter.get('/', requireAuth, async (req, res, next) => {
   }
 });
 
-timetableRouter.get('/:id', requireAuth, async (req, res, next) => {
+timetableRouter.get("/:id", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user.id;
     const entry = await timetableService.getEntry(req.params.id, userId);
@@ -34,7 +40,7 @@ timetableRouter.get('/:id', requireAuth, async (req, res, next) => {
   }
 });
 
-timetableRouter.post('/', requireAuth, async (req, res, next) => {
+timetableRouter.post("/", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user.id;
     const data = CreateTimetableEntryRequestSchema.parse(req.body);
@@ -45,22 +51,29 @@ timetableRouter.post('/', requireAuth, async (req, res, next) => {
   }
 });
 
-timetableRouter.patch('/:id', requireAuth, async (req, res, next) => {
+timetableRouter.patch("/:id", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user.id;
     const data = UpdateTimetableEntryRequestSchema.parse(req.body);
-    const entry = await timetableService.updateEntry(req.params.id, userId, data);
+    const entry = await timetableService.updateEntry(
+      req.params.id,
+      userId,
+      data,
+    );
     res.json({ success: true, data: entry });
   } catch (error) {
     next(error);
   }
 });
 
-timetableRouter.delete('/:id', requireAuth, async (req, res, next) => {
+timetableRouter.delete("/:id", requireAuth, async (req, res, next) => {
   try {
     const userId = req.user.id;
     await timetableService.deleteEntry(req.params.id, userId);
-    res.json({ success: true, message: 'Timetable entry deleted successfully' });
+    res.json({
+      success: true,
+      message: "Timetable entry deleted successfully",
+    });
   } catch (error) {
     next(error);
   }

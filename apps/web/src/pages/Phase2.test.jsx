@@ -1,14 +1,19 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
-import { TasksPage } from './TasksPage.jsx';
-import { CalendarPage } from './CalendarPage.jsx';
-import { NotificationsPage } from './NotificationsPage.jsx';
-import { ThemeProvider } from '../lib/theme.jsx';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, act } from "@testing-library/react";
+import { TasksPage } from "./TasksPage.jsx";
+import { CalendarPage } from "./CalendarPage.jsx";
+import { NotificationsPage } from "./NotificationsPage.jsx";
+import { ThemeProvider } from "../lib/theme.jsx";
 
 // Mock auth context
-vi.mock('../lib/auth-context.jsx', () => ({
+vi.mock("../lib/auth-context.jsx", () => ({
   useAuth: () => ({
-    user: { id: 'u1', name: 'Test Student', email: 'student@example.com', profileComplete: true },
+    user: {
+      id: "u1",
+      name: "Test Student",
+      email: "student@example.com",
+      profileComplete: true,
+    },
     loading: false,
     login: vi.fn(),
     logout: vi.fn(),
@@ -17,51 +22,51 @@ vi.mock('../lib/auth-context.jsx', () => ({
 }));
 
 // Mock api client
-vi.mock('../lib/api-client.js', () => ({
+vi.mock("../lib/api-client.js", () => ({
   apiClient: vi.fn().mockImplementation((url) => {
-    if (url.includes('/api/tasks')) {
+    if (url.includes("/api/tasks")) {
       return Promise.resolve({
         success: true,
         data: [
           {
-            id: 't1',
-            userId: 'u1',
-            title: 'Mock Database Assignment',
+            id: "t1",
+            userId: "u1",
+            title: "Mock Database Assignment",
             dueAt: new Date(Date.now() + 86400000).toISOString(),
-            priority: 'HIGH',
-            category: 'ASSIGNMENT',
-            status: 'TODO',
+            priority: "HIGH",
+            category: "ASSIGNMENT",
+            status: "TODO",
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           },
         ],
       });
     }
-    if (url.includes('/api/calendar')) {
+    if (url.includes("/api/calendar")) {
       return Promise.resolve({
         success: true,
         data: [
           {
-            id: 'c1',
-            type: 'CLASS',
-            title: 'Computer Networks',
+            id: "c1",
+            type: "CLASS",
+            title: "Computer Networks",
             startAt: new Date().toISOString(),
             endAt: new Date().toISOString(),
           },
         ],
       });
     }
-    if (url.includes('/api/notifications')) {
+    if (url.includes("/api/notifications")) {
       return Promise.resolve({
         success: true,
         data: {
           notifications: [
             {
-              id: 'n1',
-              userId: 'u1',
-              type: 'TASK',
-              title: 'Mock Assignment Due',
-              message: 'Database assignment is due tomorrow',
+              id: "n1",
+              userId: "u1",
+              type: "TASK",
+              title: "Mock Assignment Due",
+              message: "Database assignment is due tomorrow",
               scheduledAt: new Date().toISOString(),
               createdAt: new Date().toISOString(),
             },
@@ -70,13 +75,13 @@ vi.mock('../lib/api-client.js', () => ({
         },
       });
     }
-    if (url.includes('/api/notification-preferences')) {
+    if (url.includes("/api/notification-preferences")) {
       return Promise.resolve({
         success: true,
         data: [
           {
-            id: 'p1',
-            type: 'TASK',
+            id: "p1",
+            type: "TASK",
             enabled: true,
             timingMinutes: 30,
           },
@@ -87,50 +92,54 @@ vi.mock('../lib/api-client.js', () => ({
   }),
 }));
 
-describe('Phase 2 Frontend Components', () => {
+describe("Phase 2 Frontend Components", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('renders TasksPage with task list and action buttons', async () => {
+  it("renders TasksPage with task list and action buttons", async () => {
     await act(async () => {
       render(
         <ThemeProvider defaultTheme="light">
           <TasksPage />
-        </ThemeProvider>
+        </ThemeProvider>,
       );
     });
 
-    expect(screen.getByText('Tasks & Assignments')).toBeDefined();
-    expect(screen.getByText('Mock Database Assignment')).toBeDefined();
-    expect(screen.getByText('Add Task')).toBeDefined();
+    expect(screen.getByText("Tasks & Assignments")).toBeDefined();
+    expect(screen.getByText("Mock Database Assignment")).toBeDefined();
+    expect(screen.getByText("Add Task")).toBeDefined();
   });
 
-  it('renders CalendarPage with navigation and grid', async () => {
+  it("renders CalendarPage with navigation and grid", async () => {
     await act(async () => {
       render(
         <ThemeProvider defaultTheme="light">
           <CalendarPage />
-        </ThemeProvider>
+        </ThemeProvider>,
       );
     });
 
-    expect(screen.getByRole('heading', { name: /Academic Calendar/i })).toBeDefined();
-    expect(screen.getByRole('button', { name: /^Today$/i })).toBeDefined();
-    expect(screen.getByText('Mon')).toBeDefined();
+    expect(
+      screen.getByRole("heading", { name: /Academic Calendar/i }),
+    ).toBeDefined();
+    expect(screen.getByRole("button", { name: /^Today$/i })).toBeDefined();
+    expect(screen.getByText("Mon")).toBeDefined();
   });
 
-  it('renders NotificationsPage with notification item and tabs', async () => {
+  it("renders NotificationsPage with notification item and tabs", async () => {
     await act(async () => {
       render(
         <ThemeProvider defaultTheme="light">
           <NotificationsPage />
-        </ThemeProvider>
+        </ThemeProvider>,
       );
     });
 
-    expect(screen.getByRole('heading', { name: /^Notifications$/i })).toBeDefined();
-    expect(screen.getByText('Mock Assignment Due')).toBeDefined();
-    expect(screen.getByText('Preferences')).toBeDefined();
+    expect(
+      screen.getByRole("heading", { name: /^Notifications$/i }),
+    ).toBeDefined();
+    expect(screen.getByText("Mock Assignment Due")).toBeDefined();
+    expect(screen.getByText("Preferences")).toBeDefined();
   });
 });

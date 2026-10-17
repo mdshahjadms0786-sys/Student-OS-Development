@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { apiClient } from './api-client.js';
+import * as React from "react";
+import { apiClient } from "./api-client.js";
 
 const AuthContext = React.createContext(undefined);
 
@@ -7,7 +7,8 @@ function formatUser(userData) {
   if (!userData) return null;
   const isComplete = Boolean(
     userData.profileComplete ||
-      (userData.profile && (userData.profile.program || userData.profile.semester))
+    (userData.profile &&
+      (userData.profile.program || userData.profile.semester)),
   );
   return {
     ...userData,
@@ -22,7 +23,7 @@ export function AuthProvider({ children }) {
   React.useEffect(() => {
     async function checkAuth() {
       try {
-        const res = await apiClient('/api/auth/me');
+        const res = await apiClient("/api/auth/me");
         if (res.success && res.data) {
           setUser(formatUser(res.data));
         }
@@ -41,7 +42,7 @@ export function AuthProvider({ children }) {
 
   const logout = React.useCallback(async () => {
     try {
-      await apiClient('/api/auth/logout', { method: 'POST' });
+      await apiClient("/api/auth/logout", { method: "POST" });
     } catch {}
     setUser(null);
   }, []);
@@ -60,7 +61,7 @@ export function AuthProvider({ children }) {
 export function useAuth() {
   const context = React.useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

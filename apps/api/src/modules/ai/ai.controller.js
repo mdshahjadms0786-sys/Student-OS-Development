@@ -38,7 +38,10 @@ export async function handleAcceptStudyPlan(req, res, next) {
       throw new AppError(parseResult.error.errors[0].message, 400);
     }
 
-    const result = await aiService.acceptStudyPlan(userId, parseResult.data.items);
+    const result = await aiService.acceptStudyPlan(
+      userId,
+      parseResult.data.items,
+    );
     res.status(201).json({ success: true, data: result });
   } catch (err) {
     next(err);
@@ -89,7 +92,10 @@ export async function handleExamPrep(req, res, next) {
       throw new AppError(parseResult.error.errors[0].message, 400);
     }
 
-    const prep = await aiService.generateExamPrep(userId, parseResult.data.examId);
+    const prep = await aiService.generateExamPrep(
+      userId,
+      parseResult.data.examId,
+    );
     res.status(200).json({ success: true, data: prep });
   } catch (err) {
     next(err);

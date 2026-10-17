@@ -1,8 +1,8 @@
-import * as React from 'react';
-import { Card, CardContent, Button, Badge, Input } from '@student-os/ui';
-import { Spinner } from '../components/ui/Spinner.jsx';
-import { apiClient } from '../lib/api-client.js';
-import { toast } from 'sonner';
+import * as React from "react";
+import { Card, CardContent, Button, Badge, Input } from "@student-os/ui";
+import { Spinner } from "../components/ui/Spinner.jsx";
+import { apiClient } from "../lib/api-client.js";
+import { toast } from "sonner";
 import {
   Plus,
   CheckCircle2,
@@ -12,11 +12,11 @@ import {
   Edit2,
   Clock,
   Filter,
-} from 'lucide-react';
-import { AppShell } from '../components/layout/AppShell.jsx';
-import { useRouter } from '../lib/router.jsx';
-import { useAuth } from '../lib/auth-context.jsx';
-import { format, isPast, isToday, parseISO } from 'date-fns';
+} from "lucide-react";
+import { AppShell } from "../components/layout/AppShell.jsx";
+import { useRouter } from "../lib/router.jsx";
+import { useAuth } from "../lib/auth-context.jsx";
+import { format, isPast, isToday, parseISO } from "date-fns";
 
 export function TasksPage() {
   const { user } = useAuth();
@@ -27,34 +27,34 @@ export function TasksPage() {
   const [loading, setLoading] = React.useState(true);
 
   // Filters
-  const [search, setSearch] = React.useState('');
-  const [statusFilter, setStatusFilter] = React.useState('ALL');
-  const [priorityFilter, setPriorityFilter] = React.useState('ALL');
-  const [categoryFilter, setCategoryFilter] = React.useState('ALL');
-  const [subjectFilter, setSubjectFilter] = React.useState('ALL');
+  const [search, setSearch] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState("ALL");
+  const [priorityFilter, setPriorityFilter] = React.useState("ALL");
+  const [categoryFilter, setCategoryFilter] = React.useState("ALL");
+  const [subjectFilter, setSubjectFilter] = React.useState("ALL");
 
   // Modal states
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
   const [editingTask, setEditingTask] = React.useState(null);
 
   // Form states
-  const [formTitle, setFormTitle] = React.useState('');
-  const [formDescription, setFormDescription] = React.useState('');
-  const [formSubjectId, setFormSubjectId] = React.useState('');
-  const [formDueAt, setFormDueAt] = React.useState('');
-  const [formPriority, setFormPriority] = React.useState('MEDIUM');
-  const [formCategory, setFormCategory] = React.useState('ASSIGNMENT');
-  const [formStatus, setFormStatus] = React.useState('TODO');
+  const [formTitle, setFormTitle] = React.useState("");
+  const [formDescription, setFormDescription] = React.useState("");
+  const [formSubjectId, setFormSubjectId] = React.useState("");
+  const [formDueAt, setFormDueAt] = React.useState("");
+  const [formPriority, setFormPriority] = React.useState("MEDIUM");
+  const [formCategory, setFormCategory] = React.useState("ASSIGNMENT");
+  const [formStatus, setFormStatus] = React.useState("TODO");
   const [saving, setSaving] = React.useState(false);
 
   const fetchTasks = React.useCallback(async () => {
     try {
-      const res = await apiClient('/api/tasks');
+      const res = await apiClient("/api/tasks");
       if (res.success && res.data) {
         setTasks(res.data);
       }
     } catch {
-      toast.error('Failed to load tasks');
+      toast.error("Failed to load tasks");
     } finally {
       setLoading(false);
     }
@@ -62,7 +62,7 @@ export function TasksPage() {
 
   const fetchSubjects = React.useCallback(async () => {
     try {
-      const res = await apiClient('/api/subjects');
+      const res = await apiClient("/api/subjects");
       if (res.success && res.data) {
         setSubjects(res.data);
       }
@@ -77,44 +77,54 @@ export function TasksPage() {
   }, [fetchTasks, fetchSubjects]);
 
   const openCreateModal = () => {
-    setFormTitle('');
-    setFormDescription('');
-    setFormSubjectId('');
+    setFormTitle("");
+    setFormDescription("");
+    setFormSubjectId("");
     // Default due date to tomorrow at 23:59
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(23, 59, 0, 0);
     const tzOffset = tomorrow.getTimezoneOffset() * 60000;
-    const localISOTime = new Date(tomorrow.getTime() - tzOffset).toISOString().slice(0, 16);
+    const localISOTime = new Date(tomorrow.getTime() - tzOffset)
+      .toISOString()
+      .slice(0, 16);
     setFormDueAt(localISOTime);
-    setFormPriority('MEDIUM');
-    setFormCategory('ASSIGNMENT');
-    setFormStatus('TODO');
+    setFormPriority("MEDIUM");
+    setFormCategory("ASSIGNMENT");
+    setFormStatus("TODO");
     setIsCreateOpen(true);
   };
 
   const openEditModal = (task) => {
     setEditingTask(task);
     setFormTitle(task.title);
-    setFormDescription(task.description || '');
-    setFormSubjectId(task.subjectId || '');
+    setFormDescription(task.description || "");
+    setFormSubjectId(task.subjectId || "");
     const dateObj = new Date(task.dueAt);
     const tzOffset = dateObj.getTimezoneOffset() * 60000;
-    const localISOTime = new Date(dateObj.getTime() - tzOffset).toISOString().slice(0, 16);
+    const localISOTime = new Date(dateObj.getTime() - tzOffset)
+      .toISOString()
+      .slice(0, 16);
     setFormDueAt(localISOTime);
     setFormPriority(task.priority);
     setFormCategory(task.category);
-    setFormStatus(task.status === 'COMPLETED' ? 'COMPLETED' : task.status === 'IN_PROGRESS' ? 'IN_PROGRESS' : 'TODO');
+    setFormStatus(
+      task.status === "COMPLETED"
+        ? "COMPLETED"
+        : task.status === "IN_PROGRESS"
+          ? "IN_PROGRESS"
+          : "TODO",
+    );
   };
 
   const handleSaveTask = async (e) => {
     e.preventDefault();
     if (!formTitle.trim()) {
-      toast.error('Title is required');
+      toast.error("Title is required");
       return;
     }
     if (!formDueAt) {
-      toast.error('Due date is required');
+      toast.error("Due date is required");
       return;
     }
 
@@ -133,27 +143,29 @@ export function TasksPage() {
 
       if (editingTask) {
         const res = await apiClient(`/api/tasks/${editingTask.id}`, {
-          method: 'PATCH',
+          method: "PATCH",
           body: JSON.stringify(payload),
         });
         if (res.success && res.data) {
-          toast.success('Task updated');
-          setTasks((prev) => prev.map((t) => (t.id === editingTask.id ? res.data : t)));
+          toast.success("Task updated");
+          setTasks((prev) =>
+            prev.map((t) => (t.id === editingTask.id ? res.data : t)),
+          );
           setEditingTask(null);
         }
       } else {
-        const res = await apiClient('/api/tasks', {
-          method: 'POST',
+        const res = await apiClient("/api/tasks", {
+          method: "POST",
           body: JSON.stringify(payload),
         });
         if (res.success && res.data) {
-          toast.success('Task created');
+          toast.success("Task created");
           setTasks((prev) => [res.data, ...prev]);
           setIsCreateOpen(false);
         }
       }
     } catch {
-      toast.error('Failed to save task');
+      toast.error("Failed to save task");
     } finally {
       setSaving(false);
     }
@@ -162,32 +174,32 @@ export function TasksPage() {
   const handleToggleComplete = async (task) => {
     try {
       const res = await apiClient(`/api/tasks/${task.id}/complete`, {
-        method: 'POST',
+        method: "POST",
       });
       if (res.success && res.data) {
         const updated = res.data;
         setTasks((prev) => prev.map((t) => (t.id === task.id ? updated : t)));
-        if (updated.status === 'COMPLETED') {
+        if (updated.status === "COMPLETED") {
           toast.success(`Completed: ${task.title}`);
         } else {
           toast.info(`Marked as pending: ${task.title}`);
         }
       }
     } catch {
-      toast.error('Failed to update task status');
+      toast.error("Failed to update task status");
     }
   };
 
   const handleDeleteTask = async (taskId) => {
-    if (!confirm('Are you sure you want to delete this task?')) return;
+    if (!confirm("Are you sure you want to delete this task?")) return;
     try {
-      const res = await apiClient(`/api/tasks/${taskId}`, { method: 'DELETE' });
+      const res = await apiClient(`/api/tasks/${taskId}`, { method: "DELETE" });
       if (res.success) {
-        toast.success('Task deleted');
+        toast.success("Task deleted");
         setTasks((prev) => prev.filter((t) => t.id !== taskId));
       }
     } catch {
-      toast.error('Failed to delete task');
+      toast.error("Failed to delete task");
     }
   };
 
@@ -196,21 +208,23 @@ export function TasksPage() {
     if (search && !t.title.toLowerCase().includes(search.toLowerCase())) {
       return false;
     }
-    if (statusFilter !== 'ALL') {
-      if (statusFilter === 'OVERDUE') {
-        const isOverdue = (t.status === 'TODO' || t.status === 'IN_PROGRESS') && isPast(parseISO(t.dueAt));
+    if (statusFilter !== "ALL") {
+      if (statusFilter === "OVERDUE") {
+        const isOverdue =
+          (t.status === "TODO" || t.status === "IN_PROGRESS") &&
+          isPast(parseISO(t.dueAt));
         if (!isOverdue) return false;
       } else if (t.status !== statusFilter) {
         return false;
       }
     }
-    if (priorityFilter !== 'ALL' && t.priority !== priorityFilter) {
+    if (priorityFilter !== "ALL" && t.priority !== priorityFilter) {
       return false;
     }
-    if (categoryFilter !== 'ALL' && t.category !== categoryFilter) {
+    if (categoryFilter !== "ALL" && t.category !== categoryFilter) {
       return false;
     }
-    if (subjectFilter !== 'ALL' && t.subjectId !== subjectFilter) {
+    if (subjectFilter !== "ALL" && t.subjectId !== subjectFilter) {
       return false;
     }
     return true;
@@ -218,24 +232,28 @@ export function TasksPage() {
 
   // Calculate metrics
   const totalTasks = tasks.length;
-  const inProgressCount = tasks.filter((t) => t.status === 'IN_PROGRESS' || t.status === 'TODO').length;
-  const completedCount = tasks.filter((t) => t.status === 'COMPLETED').length;
+  const inProgressCount = tasks.filter(
+    (t) => t.status === "IN_PROGRESS" || t.status === "TODO",
+  ).length;
+  const completedCount = tasks.filter((t) => t.status === "COMPLETED").length;
   const overdueCount = tasks.filter(
-    (t) => (t.status === 'TODO' || t.status === 'IN_PROGRESS') && isPast(parseISO(t.dueAt))
+    (t) =>
+      (t.status === "TODO" || t.status === "IN_PROGRESS") &&
+      isPast(parseISO(t.dueAt)),
   ).length;
 
   const priorityColor = (p) => {
     switch (p) {
-      case 'URGENT':
-        return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800';
-      case 'HIGH':
-        return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800';
-      case 'MEDIUM':
-        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800';
-      case 'LOW':
-        return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+      case "URGENT":
+        return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800";
+      case "HIGH":
+        return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800";
+      case "MEDIUM":
+        return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800";
+      case "LOW":
+        return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700";
       default:
-        return 'bg-slate-100 text-slate-700';
+        return "bg-slate-100 text-slate-700";
     }
   };
 
@@ -260,26 +278,42 @@ export function TasksPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <Card>
           <CardContent className="p-4">
-            <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Tasks</div>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{totalTasks}</div>
+            <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+              Total Tasks
+            </div>
+            <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+              {totalTasks}
+            </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">Pending</div>
-            <div className="text-2xl font-bold text-blue-600 mt-1">{inProgressCount}</div>
+            <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+              Pending
+            </div>
+            <div className="text-2xl font-bold text-blue-600 mt-1">
+              {inProgressCount}
+            </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">Completed</div>
-            <div className="text-2xl font-bold text-emerald-600 mt-1">{completedCount}</div>
+            <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+              Completed
+            </div>
+            <div className="text-2xl font-bold text-emerald-600 mt-1">
+              {completedCount}
+            </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">Overdue</div>
-            <div className="text-2xl font-bold text-red-600 mt-1">{overdueCount}</div>
+            <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+              Overdue
+            </div>
+            <div className="text-2xl font-bold text-red-600 mt-1">
+              {overdueCount}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -354,16 +388,20 @@ export function TasksPage() {
                 </select>
               )}
 
-              {(search || statusFilter !== 'ALL' || priorityFilter !== 'ALL' || categoryFilter !== 'ALL' || subjectFilter !== 'ALL') && (
+              {(search ||
+                statusFilter !== "ALL" ||
+                priorityFilter !== "ALL" ||
+                categoryFilter !== "ALL" ||
+                subjectFilter !== "ALL") && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    setSearch('');
-                    setStatusFilter('ALL');
-                    setPriorityFilter('ALL');
-                    setCategoryFilter('ALL');
-                    setSubjectFilter('ALL');
+                    setSearch("");
+                    setStatusFilter("ALL");
+                    setPriorityFilter("ALL");
+                    setCategoryFilter("ALL");
+                    setSubjectFilter("ALL");
                   }}
                   className="text-xs"
                 >
@@ -389,12 +427,14 @@ export function TasksPage() {
               </div>
             </div>
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-              {tasks.length === 0 ? 'No tasks created yet' : 'No matching tasks found'}
+              {tasks.length === 0
+                ? "No tasks created yet"
+                : "No matching tasks found"}
             </h3>
             <p className="text-sm text-slate-500 max-w-sm mx-auto">
               {tasks.length === 0
-                ? 'Stay on top of assignments, homework, and projects by adding your first task.'
-                : 'Try adjusting your search terms or filter criteria.'}
+                ? "Stay on top of assignments, homework, and projects by adding your first task."
+                : "Try adjusting your search terms or filter criteria."}
             </p>
             {tasks.length === 0 && (
               <Button onClick={openCreateModal} className="mt-2">
@@ -407,15 +447,18 @@ export function TasksPage() {
         <div className="space-y-3">
           {filteredTasks.map((task) => {
             const dueDate = parseISO(task.dueAt);
-            const isCompleted = task.status === 'COMPLETED';
-            const overdue = !isCompleted && isPast(dueDate) && !isToday(dueDate);
+            const isCompleted = task.status === "COMPLETED";
+            const overdue =
+              !isCompleted && isPast(dueDate) && !isToday(dueDate);
             const dueToday = !isCompleted && isToday(dueDate);
 
             return (
               <Card
                 key={task.id}
                 className={`transition-all hover:shadow-sm ${
-                  isCompleted ? 'opacity-65 bg-slate-50 dark:bg-slate-900/40' : ''
+                  isCompleted
+                    ? "opacity-65 bg-slate-50 dark:bg-slate-900/40"
+                    : ""
                 }`}
               >
                 <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -435,7 +478,9 @@ export function TasksPage() {
                       <div className="flex flex-wrap items-center gap-2">
                         <span
                           className={`font-medium text-slate-900 dark:text-white truncate ${
-                            isCompleted ? 'line-through text-slate-500 dark:text-slate-400' : ''
+                            isCompleted
+                              ? "line-through text-slate-500 dark:text-slate-400"
+                              : ""
                           }`}
                         >
                           {task.title}
@@ -445,14 +490,16 @@ export function TasksPage() {
                             variant="secondary"
                             className="text-xs"
                             style={{
-                              backgroundColor: `${task.subject.color || '#3b82f6'}20`,
-                              color: task.subject.color || '#3b82f6',
+                              backgroundColor: `${task.subject.color || "#3b82f6"}20`,
+                              color: task.subject.color || "#3b82f6",
                             }}
                           >
                             {task.subject.code}
                           </Badge>
                         )}
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${priorityColor(task.priority)}`}>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full font-medium border ${priorityColor(task.priority)}`}
+                        >
                           {task.priority}
                         </span>
                         <Badge variant="outline" className="text-xs">
@@ -470,15 +517,19 @@ export function TasksPage() {
                         <span
                           className={`flex items-center gap-1 font-medium ${
                             overdue
-                              ? 'text-red-600 dark:text-red-400'
+                              ? "text-red-600 dark:text-red-400"
                               : dueToday
-                              ? 'text-amber-600 dark:text-amber-400'
-                              : 'text-slate-500'
+                                ? "text-amber-600 dark:text-amber-400"
+                                : "text-slate-500"
                           }`}
                         >
                           <Clock className="h-3.5 w-3.5" />
-                          {overdue ? 'Overdue: ' : dueToday ? 'Due Today: ' : 'Due: '}
-                          {format(dueDate, 'MMM d, yyyy h:mm a')}
+                          {overdue
+                            ? "Overdue: "
+                            : dueToday
+                              ? "Due Today: "
+                              : "Due: "}
+                          {format(dueDate, "MMM d, yyyy h:mm a")}
                         </span>
                       </div>
                     </div>
@@ -514,7 +565,7 @@ export function TasksPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
           <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">
-              {editingTask ? 'Edit Task' : 'Create New Task'}
+              {editingTask ? "Edit Task" : "Create New Task"}
             </h3>
             <form onSubmit={handleSaveTask} className="space-y-4">
               <div>
@@ -638,7 +689,11 @@ export function TasksPage() {
                   Cancel
                 </Button>
                 <Button type="submit" disabled={saving}>
-                  {saving ? 'Saving...' : editingTask ? 'Update Task' : 'Create Task'}
+                  {saving
+                    ? "Saving..."
+                    : editingTask
+                      ? "Update Task"
+                      : "Create Task"}
                 </Button>
               </div>
             </form>

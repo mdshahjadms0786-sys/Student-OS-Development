@@ -169,7 +169,11 @@ export function AiPage() {
 
   // 2. Accept Study Plan
   const handleAcceptPlan = async () => {
-    if (!generatedPlan || !generatedPlan.items || generatedPlan.items.length === 0) {
+    if (
+      !generatedPlan ||
+      !generatedPlan.items ||
+      generatedPlan.items.length === 0
+    ) {
       setErrorMsg("Please keep at least one study task before accepting.");
       return;
     }
@@ -191,7 +195,7 @@ export function AiPage() {
         body: JSON.stringify({ items: itemsToAccept }),
       });
       setPlanAcceptedSuccess(
-        res.data?.message || "Plan items added to your tasks!"
+        res.data?.message || "Plan items added to your tasks!",
       );
     } catch (err) {
       setErrorMsg(err.message || "Failed to accept plan.");
@@ -277,13 +281,17 @@ export function AiPage() {
               </span>
             </div>
             <p className="mt-1 text-sm text-blue-100">
-              Personalized study planning, doubt resolution, note summaries & exam prep powered by your academic workflow.
+              Personalized study planning, doubt resolution, note summaries &
+              exam prep powered by your academic workflow.
             </p>
           </div>
 
           <div className="flex items-center gap-2 rounded-lg bg-white/10 p-3 text-xs text-blue-100 backdrop-blur-sm">
             <Bot className="h-5 w-5 text-amber-300 shrink-0" />
-            <span>AI outputs require explicit user review & never alter official university records.</span>
+            <span>
+              AI outputs require explicit user review & never alter official
+              university records.
+            </span>
           </div>
         </div>
 
@@ -314,7 +322,7 @@ export function AiPage() {
                   "flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors",
                   isActive
                     ? "border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400"
-                    : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                    : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200",
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -334,7 +342,8 @@ export function AiPage() {
                 Configure Study Plan
               </h2>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Generate an optimized daily schedule based on your upcoming exams and pending tasks.
+                Generate an optimized daily schedule based on your upcoming
+                exams and pending tasks.
               </p>
 
               <form onSubmit={handleGeneratePlan} className="mt-4 space-y-4">
@@ -347,7 +356,12 @@ export function AiPage() {
                     min="1"
                     max="16"
                     value={plannerOptions.studyHoursPerDay}
-                    onChange={(e) => setPlannerOptions({ ...plannerOptions, studyHoursPerDay: e.target.value })}
+                    onChange={(e) =>
+                      setPlannerOptions({
+                        ...plannerOptions,
+                        studyHoursPerDay: e.target.value,
+                      })
+                    }
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                   />
                 </div>
@@ -358,7 +372,12 @@ export function AiPage() {
                   </label>
                   <select
                     value={plannerOptions.days}
-                    onChange={(e) => setPlannerOptions({ ...plannerOptions, days: e.target.value })}
+                    onChange={(e) =>
+                      setPlannerOptions({
+                        ...plannerOptions,
+                        days: e.target.value,
+                      })
+                    }
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                   >
                     <option value="3">3 Days (Sprint)</option>
@@ -373,7 +392,12 @@ export function AiPage() {
                   </label>
                   <select
                     value={plannerOptions.targetSubjectId}
-                    onChange={(e) => setPlannerOptions({ ...plannerOptions, targetSubjectId: e.target.value })}
+                    onChange={(e) =>
+                      setPlannerOptions({
+                        ...plannerOptions,
+                        targetSubjectId: e.target.value,
+                      })
+                    }
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                   >
                     <option value="">All Subjects (Balanced)</option>
@@ -408,7 +432,9 @@ export function AiPage() {
                     <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                     <span>{planAcceptedSuccess}</span>
                   </div>
-                  <a href="#tasks" className="font-semibold underline">View Tasks</a>
+                  <a href="#tasks" className="font-semibold underline">
+                    View Tasks
+                  </a>
                 </div>
               )}
 
@@ -510,7 +536,7 @@ export function AiPage() {
                                     handleUpdatePlanItem(
                                       idx,
                                       "title",
-                                      e.target.value
+                                      e.target.value,
                                     )
                                   }
                                   className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
@@ -528,7 +554,7 @@ export function AiPage() {
                                     handleUpdatePlanItem(
                                       idx,
                                       "description",
-                                      e.target.value
+                                      e.target.value,
                                     )
                                   }
                                   className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
@@ -545,7 +571,7 @@ export function AiPage() {
                                     handleUpdatePlanItem(
                                       idx,
                                       "subjectId",
-                                      e.target.value || null
+                                      e.target.value || null,
                                     )
                                   }
                                   className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
@@ -573,7 +599,7 @@ export function AiPage() {
                                     handleUpdatePlanItem(
                                       idx,
                                       "durationMinutes",
-                                      Number(e.target.value)
+                                      Number(e.target.value),
                                     )
                                   }
                                   className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
@@ -590,7 +616,7 @@ export function AiPage() {
                                     handleUpdatePlanItem(
                                       idx,
                                       "priority",
-                                      e.target.value
+                                      e.target.value,
                                     )
                                   }
                                   className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
@@ -612,7 +638,7 @@ export function AiPage() {
                                     handleUpdatePlanItem(
                                       idx,
                                       "category",
-                                      e.target.value
+                                      e.target.value,
                                     )
                                   }
                                   className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
@@ -694,7 +720,8 @@ export function AiPage() {
                     No Plan Generated Yet
                   </h3>
                   <p className="mt-1 text-xs text-slate-500 max-w-sm">
-                    Configure your preferences on the left and click "Generate Roadmap" to create a personalized study schedule.
+                    Configure your preferences on the left and click "Generate
+                    Roadmap" to create a personalized study schedule.
                   </p>
                 </div>
               )}
@@ -711,7 +738,8 @@ export function AiPage() {
                 Ask a Question
               </h2>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Get instant educational explanations, code examples, and next steps for your course subjects.
+                Get instant educational explanations, code examples, and next
+                steps for your course subjects.
               </p>
 
               <form onSubmit={handleAskDoubt} className="mt-4 space-y-4">
@@ -779,33 +807,41 @@ export function AiPage() {
 
                   <div className="mt-4 space-y-4">
                     <div>
-                      <h4 className="text-xs font-semibold uppercase text-slate-400">Explanation</h4>
+                      <h4 className="text-xs font-semibold uppercase text-slate-400">
+                        Explanation
+                      </h4>
                       <p className="mt-1 text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line">
                         {doubtResult.explanation}
                       </p>
                     </div>
 
-                    {doubtResult.examples && doubtResult.examples.length > 0 && (
-                      <div>
-                        <h4 className="text-xs font-semibold uppercase text-slate-400">Examples & Applications</h4>
-                        <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700 dark:text-slate-300">
-                          {doubtResult.examples.map((ex, i) => (
-                            <li key={i}>{ex}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                    {doubtResult.examples &&
+                      doubtResult.examples.length > 0 && (
+                        <div>
+                          <h4 className="text-xs font-semibold uppercase text-slate-400">
+                            Examples & Applications
+                          </h4>
+                          <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700 dark:text-slate-300">
+                            {doubtResult.examples.map((ex, i) => (
+                              <li key={i}>{ex}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
 
-                    {doubtResult.nextSteps && doubtResult.nextSteps.length > 0 && (
-                      <div>
-                        <h4 className="text-xs font-semibold uppercase text-slate-400">Recommended Next Steps</h4>
-                        <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700 dark:text-slate-300">
-                          {doubtResult.nextSteps.map((step, i) => (
-                            <li key={i}>{step}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                    {doubtResult.nextSteps &&
+                      doubtResult.nextSteps.length > 0 && (
+                        <div>
+                          <h4 className="text-xs font-semibold uppercase text-slate-400">
+                            Recommended Next Steps
+                          </h4>
+                          <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700 dark:text-slate-300">
+                            {doubtResult.nextSteps.map((step, i) => (
+                              <li key={i}>{step}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                   </div>
                 </div>
               ) : (
@@ -815,7 +851,8 @@ export function AiPage() {
                     Ask Anything Academic
                   </h3>
                   <p className="mt-1 text-xs text-slate-500 max-w-sm">
-                    Enter your question in the box to get structured explanations and learning steps.
+                    Enter your question in the box to get structured
+                    explanations and learning steps.
                   </p>
                 </div>
               )}
@@ -832,7 +869,8 @@ export function AiPage() {
                 Summarize Note
               </h2>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Select an existing note or paste text to extract key points and self-test revision questions.
+                Select an existing note or paste text to extract key points and
+                self-test revision questions.
               </p>
 
               <form onSubmit={handleSummarizeNote} className="mt-4 space-y-4">
@@ -874,7 +912,10 @@ export function AiPage() {
 
                 <button
                   type="submit"
-                  disabled={noteSummaryLoading || (!selectedNoteId && !customNoteContent.trim())}
+                  disabled={
+                    noteSummaryLoading ||
+                    (!selectedNoteId && !customNoteContent.trim())
+                  }
                   className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
                 >
                   {noteSummaryLoading ? (
@@ -904,14 +945,18 @@ export function AiPage() {
 
                   <div className="mt-4 space-y-4">
                     <div>
-                      <h4 className="text-xs font-semibold uppercase text-slate-400">Summary Overview</h4>
+                      <h4 className="text-xs font-semibold uppercase text-slate-400">
+                        Summary Overview
+                      </h4>
                       <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
                         {noteSummaryResult.summary}
                       </p>
                     </div>
 
                     <div>
-                      <h4 className="text-xs font-semibold uppercase text-slate-400">Key Takeaways</h4>
+                      <h4 className="text-xs font-semibold uppercase text-slate-400">
+                        Key Takeaways
+                      </h4>
                       <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700 dark:text-slate-300">
                         {noteSummaryResult.keyPoints.map((pt, i) => (
                           <li key={i}>{pt}</li>
@@ -920,10 +965,15 @@ export function AiPage() {
                     </div>
 
                     <div>
-                      <h4 className="text-xs font-semibold uppercase text-slate-400">Self-Test Revision Questions</h4>
+                      <h4 className="text-xs font-semibold uppercase text-slate-400">
+                        Self-Test Revision Questions
+                      </h4>
                       <div className="mt-2 space-y-2">
                         {noteSummaryResult.revisionQuestions.map((q, i) => (
-                          <div key={i} className="rounded-lg bg-slate-50 p-3 text-xs font-medium text-slate-800 dark:bg-slate-800/50 dark:text-slate-200">
+                          <div
+                            key={i}
+                            className="rounded-lg bg-slate-50 p-3 text-xs font-medium text-slate-800 dark:bg-slate-800/50 dark:text-slate-200"
+                          >
                             Q{i + 1}: {q}
                           </div>
                         ))}
@@ -938,7 +988,8 @@ export function AiPage() {
                     Summarize Your Notes
                   </h3>
                   <p className="mt-1 text-xs text-slate-500 max-w-sm">
-                    Select a note from the dropdown to automatically extract key concepts and practice questions.
+                    Select a note from the dropdown to automatically extract key
+                    concepts and practice questions.
                   </p>
                 </div>
               )}
@@ -955,10 +1006,14 @@ export function AiPage() {
                 Exam Prep Generator
               </h2>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Select an upcoming exam to generate structured revision timelines, practice questions, and prep checklists.
+                Select an upcoming exam to generate structured revision
+                timelines, practice questions, and prep checklists.
               </p>
 
-              <form onSubmit={handleGenerateExamPrep} className="mt-4 space-y-4">
+              <form
+                onSubmit={handleGenerateExamPrep}
+                className="mt-4 space-y-4"
+              >
                 <div>
                   <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
                     Select Exam
@@ -1006,7 +1061,8 @@ export function AiPage() {
                         {examPrepResult.examTitle}
                       </h3>
                       <p className="text-xs text-slate-500">
-                        {examPrepResult.subjectName} • Exam Date: {examPrepResult.examDate}
+                        {examPrepResult.subjectName} • Exam Date:{" "}
+                        {examPrepResult.examDate}
                       </p>
                     </div>
                   </div>
@@ -1014,15 +1070,24 @@ export function AiPage() {
                   <div className="mt-6 space-y-6">
                     {/* Revision Plan */}
                     <div>
-                      <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Revision Plan Timeline</h4>
+                      <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        Revision Plan Timeline
+                      </h4>
                       <div className="mt-2 space-y-3">
                         {examPrepResult.revisionPlan.map((step, idx) => (
-                          <div key={idx} className="rounded-lg border border-slate-200 p-3 dark:border-slate-800">
+                          <div
+                            key={idx}
+                            className="rounded-lg border border-slate-200 p-3 dark:border-slate-800"
+                          >
                             <div className="flex items-center justify-between text-xs font-semibold text-slate-900 dark:text-slate-100">
                               <span>{step.phase}</span>
-                              <span className="text-blue-600">{step.estimatedHours} hrs</span>
+                              <span className="text-blue-600">
+                                {step.estimatedHours} hrs
+                              </span>
                             </div>
-                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{step.details}</p>
+                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                              {step.details}
+                            </p>
                           </div>
                         ))}
                       </div>
@@ -1030,14 +1095,21 @@ export function AiPage() {
 
                     {/* Practice Questions */}
                     <div>
-                      <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Practice Questions & Hints</h4>
+                      <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        Practice Questions & Hints
+                      </h4>
                       <div className="mt-2 space-y-3">
                         {examPrepResult.practiceQuestions.map((pq) => (
-                          <div key={pq.id} className="rounded-lg bg-slate-50 p-3.5 dark:bg-slate-800/50">
+                          <div
+                            key={pq.id}
+                            className="rounded-lg bg-slate-50 p-3.5 dark:bg-slate-800/50"
+                          >
                             <p className="text-xs font-semibold text-slate-900 dark:text-slate-100">
                               Q: {pq.question}
                             </p>
-                            <p className="mt-1 text-xs text-slate-500 italic">Hint: {pq.hint}</p>
+                            <p className="mt-1 text-xs text-slate-500 italic">
+                              Hint: {pq.hint}
+                            </p>
                           </div>
                         ))}
                       </div>
@@ -1045,7 +1117,9 @@ export function AiPage() {
 
                     {/* Checklist */}
                     <div>
-                      <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Exam Readiness Checklist</h4>
+                      <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        Exam Readiness Checklist
+                      </h4>
                       <ul className="mt-2 space-y-2 text-xs text-slate-700 dark:text-slate-300">
                         {examPrepResult.checklist.map((item, idx) => (
                           <li key={idx} className="flex items-center gap-2">
@@ -1064,7 +1138,8 @@ export function AiPage() {
                     Prepare For Exams
                   </h3>
                   <p className="mt-1 text-xs text-slate-500 max-w-sm">
-                    Select a registered exam to build a complete revision roadmap and practice question set.
+                    Select a registered exam to build a complete revision
+                    roadmap and practice question set.
                   </p>
                 </div>
               )}
@@ -1081,7 +1156,8 @@ export function AiPage() {
                   Smart Academic Recommendations
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Computed live from your task completion rates, attendance thresholds, and exam schedules.
+                  Computed live from your task completion rates, attendance
+                  thresholds, and exam schedules.
                 </p>
               </div>
 
@@ -1090,7 +1166,12 @@ export function AiPage() {
                 disabled={recommendationsLoading}
                 className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800"
               >
-                <RefreshCw className={cn("h-3.5 w-3.5", recommendationsLoading && "animate-spin")} />
+                <RefreshCw
+                  className={cn(
+                    "h-3.5 w-3.5",
+                    recommendationsLoading && "animate-spin",
+                  )}
+                />
                 <span>Refresh</span>
               </button>
             </div>
@@ -1109,7 +1190,7 @@ export function AiPage() {
                             "rounded px-2 py-0.5 text-xs font-semibold",
                             rec.priority === "HIGH" || rec.priority === "URGENT"
                               ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"
-                              : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                              : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
                           )}
                         >
                           {rec.priority} PRIORITY

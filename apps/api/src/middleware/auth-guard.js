@@ -1,11 +1,11 @@
-import { prisma } from '@student-os/database';
-import { AppError } from './error-handler.js';
+import { prisma } from "@student-os/database";
+import { AppError } from "./error-handler.js";
 
 export async function requireAuth(req, _res, next) {
   const userId = req.session?.userId;
 
   if (!userId) {
-    next(new AppError('Unauthorized: Authentication required', 401));
+    next(new AppError("Unauthorized: Authentication required", 401));
     return;
   }
 
@@ -18,7 +18,7 @@ export async function requireAuth(req, _res, next) {
     if (!user) {
       // Session exists for nonexistent user -> destroy session
       req.session.destroy(() => {});
-      next(new AppError('User account not found', 401));
+      next(new AppError("User account not found", 401));
       return;
     }
 

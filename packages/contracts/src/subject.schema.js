@@ -1,8 +1,8 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const CreateSubjectRequestSchema = z.object({
-  code: z.string().min(1, 'Subject code is required'),
-  name: z.string().min(1, 'Subject name is required'),
+  code: z.string().min(1, "Subject code is required"),
+  name: z.string().min(1, "Subject name is required"),
   credits: z.coerce.number().int().min(1).max(10).default(3),
   facultyName: z.string().optional().nullable(),
   color: z.string().optional().nullable(),

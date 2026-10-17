@@ -1,7 +1,7 @@
-import { z } from 'zod';
-import { SubjectResponseSchema } from './subject.schema.js';
+import { z } from "zod";
+import { SubjectResponseSchema } from "./subject.schema.js";
 
-export const CalendarItemTypeEnum = z.enum(['TASK', 'CLASS', 'EVENT']);
+export const CalendarItemTypeEnum = z.enum(["TASK", "CLASS", "EVENT"]);
 
 export const CalendarItemResponseSchema = z.object({
   id: z.string(),
@@ -19,6 +19,6 @@ export const CalendarItemResponseSchema = z.object({
 });
 
 export const CalendarQuerySchema = z.object({
-  from: z.string().min(1, 'from query param is required'),
-  to: z.string().min(1, 'to query param is required'),
+  from: z.string().min(1, "from query param is required"),
+  to: z.string().min(1, "to query param is required"),
 });

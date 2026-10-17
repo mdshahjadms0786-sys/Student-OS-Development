@@ -1,25 +1,51 @@
-import { z } from 'zod';
-import { SubjectResponseSchema } from './subject.schema.js';
+import { z } from "zod";
+import { SubjectResponseSchema } from "./subject.schema.js";
 
-export const TaskPriorityEnum = z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']);
+export const TaskPriorityEnum = z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]);
 
-export const TaskCategoryEnum = z.enum(['ASSIGNMENT', 'PROJECT', 'STUDY', 'REVISION', 'OTHER']);
+export const TaskCategoryEnum = z.enum([
+  "ASSIGNMENT",
+  "PROJECT",
+  "STUDY",
+  "REVISION",
+  "OTHER",
+]);
 
-export const TaskStatusEnum = z.enum(['TODO', 'IN_PROGRESS', 'COMPLETED', 'OVERDUE']);
+export const TaskStatusEnum = z.enum([
+  "TODO",
+  "IN_PROGRESS",
+  "COMPLETED",
+  "OVERDUE",
+]);
 
 export const CreateTaskRequestSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(200, 'Title cannot exceed 200 characters'),
-  description: z.string().max(2000, 'Description cannot exceed 2000 characters').optional().nullable(),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(200, "Title cannot exceed 200 characters"),
+  description: z
+    .string()
+    .max(2000, "Description cannot exceed 2000 characters")
+    .optional()
+    .nullable(),
   subjectId: z.string().optional().nullable(),
-  dueAt: z.string().min(1, 'Due date is required'),
-  priority: TaskPriorityEnum.default('MEDIUM'),
-  category: TaskCategoryEnum.default('ASSIGNMENT'),
-  status: TaskStatusEnum.default('TODO'),
+  dueAt: z.string().min(1, "Due date is required"),
+  priority: TaskPriorityEnum.default("MEDIUM"),
+  category: TaskCategoryEnum.default("ASSIGNMENT"),
+  status: TaskStatusEnum.default("TODO"),
 });
 
 export const UpdateTaskRequestSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(200, 'Title cannot exceed 200 characters').optional(),
-  description: z.string().max(2000, 'Description cannot exceed 2000 characters').optional().nullable(),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(200, "Title cannot exceed 200 characters")
+    .optional(),
+  description: z
+    .string()
+    .max(2000, "Description cannot exceed 2000 characters")
+    .optional()
+    .nullable(),
   subjectId: z.string().optional().nullable(),
   dueAt: z.string().optional(),
   priority: TaskPriorityEnum.optional(),

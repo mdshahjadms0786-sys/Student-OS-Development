@@ -1,40 +1,42 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
-import { App } from './App.jsx';
-import { ThemeProvider } from './lib/theme.jsx';
+import { describe, it, expect, beforeEach } from "vitest";
+import { render, screen, act } from "@testing-library/react";
+import { App } from "./App.jsx";
+import { ThemeProvider } from "./lib/theme.jsx";
 
-describe('Web App Layout & Auth Views', () => {
+describe("Web App Layout & Auth Views", () => {
   beforeEach(() => {
-    window.location.hash = '';
+    window.location.hash = "";
   });
 
-  it('renders login screen when unauthenticated or on #login', async () => {
-    window.location.hash = '#login';
+  it("renders login screen when unauthenticated or on #login", async () => {
+    window.location.hash = "#login";
 
     await act(async () => {
       render(
         <ThemeProvider defaultTheme="light">
           <App />
-        </ThemeProvider>
+        </ThemeProvider>,
       );
     });
 
-    expect(screen.getByText('Welcome back')).toBeDefined();
-    expect(screen.getByText('Don\'t have an account?')).toBeDefined();
+    expect(screen.getByText("Welcome back")).toBeDefined();
+    expect(screen.getByText("Don't have an account?")).toBeDefined();
   });
 
-  it('renders register screen when navigating to #register', async () => {
-    window.location.hash = '#register';
+  it("renders register screen when navigating to #register", async () => {
+    window.location.hash = "#register";
 
     await act(async () => {
       render(
         <ThemeProvider defaultTheme="light">
           <App />
-        </ThemeProvider>
+        </ThemeProvider>,
       );
     });
 
-    expect(screen.getByText('Create an account')).toBeDefined();
-    expect(screen.getByText('Sign up to get started with Student OS')).toBeDefined();
+    expect(screen.getByText("Create an account")).toBeDefined();
+    expect(
+      screen.getByText("Sign up to get started with Student OS"),
+    ).toBeDefined();
   });
 });

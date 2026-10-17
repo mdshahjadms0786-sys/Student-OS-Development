@@ -1,11 +1,11 @@
-import { Header } from './Header.jsx';
-import { Sidebar } from './Sidebar.jsx';
-import { MobileNav } from './MobileNav.jsx';
+import { Header } from "./Header.jsx";
+import { Sidebar } from "./Sidebar.jsx";
+import { MobileNav } from "./MobileNav.jsx";
 
 export function AppShell({
   children,
   user,
-  currentPath = '#home',
+  currentPath = "#home",
   onNavigate,
 }) {
   return (

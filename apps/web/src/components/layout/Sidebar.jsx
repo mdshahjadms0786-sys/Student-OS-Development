@@ -79,10 +79,11 @@ export function Sidebar({ currentPath = "#home", onNavigate }) {
           <p className="font-semibold text-slate-700 dark:text-slate-300">
             Phase 4: Intelligence
           </p>
-          <p className="mt-0.5">AI Planner, Doubt Assistant & Smart Advice active.</p>
+          <p className="mt-0.5">
+            AI Planner, Doubt Assistant & Smart Advice active.
+          </p>
         </div>
       </div>
     </aside>
   );
 }
-
