@@ -16,8 +16,12 @@ import {
   CalendarDays,
   Bot,
   Info,
+  Edit2,
+  Trash2,
+  Check,
 } from "lucide-react";
 import { AppShell } from "../components/layout/AppShell.jsx";
+import { apiClient } from "../lib/api-client.js";
 import { cn } from "@student-os/ui";
 
 export function AiPage() {
@@ -35,6 +39,7 @@ export function AiPage() {
     targetSubjectId: "",
   });
   const [generatedPlan, setGeneratedPlan] = useState(null);
+  const [editingItemIndex, setEditingItemIndex] = useState(null);
   const [planLoading, setPlanLoading] = useState(false);
   const [acceptingPlan, setAcceptingPlan] = useState(false);
   const [planAcceptedSuccess, setPlanAcceptedSuccess] = useState(null);
@@ -71,23 +76,14 @@ export function AiPage() {
   const fetchInitialData = async () => {
     try {
       const [subRes, notesRes, examsRes] = await Promise.all([
-        fetch("/api/subjects"),
-        fetch("/api/notes"),
-        fetch("/api/exams"),
+        apiClient("/api/subjects"),
+        apiClient("/api/notes"),
+        apiClient("/api/exams"),
       ]);
 
-      if (subRes.ok) {
-        const d = await subRes.json();
-        setSubjects(d.data || []);
-      }
-      if (notesRes.ok) {
-        const d = await notesRes.json();
-        setNotes(d.data || []);
-      }
-      if (examsRes.ok) {
-        const d = await examsRes.json();
-        setExams(d.data || []);
-      }
+      if (subRes.data) setSubjects(subRes.data);
+      if (notesRes.data) setNotes(notesRes.data);
+      if (examsRes.data) setExams(examsRes.data);
     } catch {
       // Ignore initial fetch errors
     }
@@ -96,10 +92,9 @@ export function AiPage() {
   const fetchRecommendations = async () => {
     setRecommendationsLoading(true);
     try {
-      const res = await fetch("/api/ai/recommendations");
-      if (res.ok) {
-        const data = await res.json();
-        setRecommendations(data.data);
+      const res = await apiClient("/api/ai/recommendations");
+      if (res.data) {
+        setRecommendations(res.data);
       }
     } catch {
       // Ignore recommendations load failure
@@ -114,48 +109,92 @@ export function AiPage() {
     setPlanLoading(true);
     setErrorMsg("");
     setPlanAcceptedSuccess(null);
+    setEditingItemIndex(null);
     try {
-      const res = await fetch("/api/ai/study-plan", {
+      const res = await apiClient("/api/ai/study-plan", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           studyHoursPerDay: Number(plannerOptions.studyHoursPerDay),
           days: Number(plannerOptions.days),
           targetSubjectId: plannerOptions.targetSubjectId || undefined,
         }),
       });
-      const data = await res.json();
-      if (res.ok) {
-        setGeneratedPlan(data.data);
-      } else {
-        setErrorMsg(data.message || "Failed to generate study plan.");
-      }
-    } catch {
-      setErrorMsg("Network error generating study plan.");
+      setGeneratedPlan(res.data);
+    } catch (err) {
+      setErrorMsg(err.message || "Failed to generate study plan.");
     } finally {
       setPlanLoading(false);
     }
   };
 
+  // Study Plan item edit handlers
+  const handleUpdatePlanItem = (index, field, value) => {
+    if (!generatedPlan || !generatedPlan.items) return;
+    const updated = [...generatedPlan.items];
+    updated[index] = { ...updated[index], [field]: value };
+    if (field === "subjectId") {
+      const sub = subjects.find((s) => s.id === value);
+      updated[index].subjectName = sub ? sub.code : "General";
+    }
+    setGeneratedPlan({ ...generatedPlan, items: updated });
+  };
+
+  const handleDeletePlanItem = (index) => {
+    if (!generatedPlan || !generatedPlan.items) return;
+    const updated = generatedPlan.items.filter((_, i) => i !== index);
+    setGeneratedPlan({ ...generatedPlan, items: updated });
+    if (editingItemIndex === index) {
+      setEditingItemIndex(null);
+    } else if (editingItemIndex > index) {
+      setEditingItemIndex(editingItemIndex - 1);
+    }
+  };
+
+  const handleAddPlanItem = () => {
+    if (!generatedPlan) return;
+    const newItem = {
+      title: "New Study Task",
+      description: "Self-study and practice",
+      subjectId: subjects[0]?.id || null,
+      subjectName: subjects[0]?.code || "General",
+      date: new Date().toISOString(),
+      durationMinutes: 60,
+      priority: "MEDIUM",
+      category: "STUDY",
+    };
+    const updated = [...(generatedPlan.items || []), newItem];
+    setGeneratedPlan({ ...generatedPlan, items: updated });
+    setEditingItemIndex(updated.length - 1);
+  };
+
   // 2. Accept Study Plan
   const handleAcceptPlan = async () => {
-    if (!generatedPlan || !generatedPlan.items) return;
+    if (!generatedPlan || !generatedPlan.items || generatedPlan.items.length === 0) {
+      setErrorMsg("Please keep at least one study task before accepting.");
+      return;
+    }
     setAcceptingPlan(true);
     setErrorMsg("");
     try {
-      const res = await fetch("/api/ai/study-plan/accept", {
+      const itemsToAccept = generatedPlan.items.map((item) => ({
+        title: item.title.trim(),
+        description: item.description?.trim() || null,
+        subjectId: item.subjectId || null,
+        date: item.date || new Date().toISOString(),
+        durationMinutes: Number(item.durationMinutes) || 60,
+        priority: item.priority || "MEDIUM",
+        category: item.category || "STUDY",
+      }));
+
+      const res = await apiClient("/api/ai/study-plan/accept", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: generatedPlan.items }),
+        body: JSON.stringify({ items: itemsToAccept }),
       });
-      const data = await res.json();
-      if (res.ok) {
-        setPlanAcceptedSuccess(data.data?.message || "Plan items added to your tasks!");
-      } else {
-        setErrorMsg(data.message || "Failed to accept plan.");
-      }
-    } catch {
-      setErrorMsg("Error committing study plan.");
+      setPlanAcceptedSuccess(
+        res.data?.message || "Plan items added to your tasks!"
+      );
+    } catch (err) {
+      setErrorMsg(err.message || "Failed to accept plan.");
     } finally {
       setAcceptingPlan(false);
     }
@@ -168,22 +207,16 @@ export function AiPage() {
     setDoubtLoading(true);
     setErrorMsg("");
     try {
-      const res = await fetch("/api/ai/doubt-assistant", {
+      const res = await apiClient("/api/ai/doubt-assistant", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question: doubtQuery,
           subjectId: doubtSubjectId || undefined,
         }),
       });
-      const data = await res.json();
-      if (res.ok) {
-        setDoubtResult(data.data);
-      } else {
-        setErrorMsg(data.message || "Failed to resolve question.");
-      }
-    } catch {
-      setErrorMsg("Network error resolving question.");
+      setDoubtResult(res.data);
+    } catch (err) {
+      setErrorMsg(err.message || "Failed to resolve question.");
     } finally {
       setDoubtLoading(false);
     }
@@ -196,22 +229,16 @@ export function AiPage() {
     setNoteSummaryLoading(true);
     setErrorMsg("");
     try {
-      const res = await fetch("/api/ai/notes-summary", {
+      const res = await apiClient("/api/ai/notes-summary", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           noteId: selectedNoteId || undefined,
           content: selectedNoteId ? undefined : customNoteContent,
         }),
       });
-      const data = await res.json();
-      if (res.ok) {
-        setNoteSummaryResult(data.data);
-      } else {
-        setErrorMsg(data.message || "Failed to summarize note.");
-      }
-    } catch {
-      setErrorMsg("Network error generating summary.");
+      setNoteSummaryResult(res.data);
+    } catch (err) {
+      setErrorMsg(err.message || "Failed to summarize note.");
     } finally {
       setNoteSummaryLoading(false);
     }
@@ -224,19 +251,13 @@ export function AiPage() {
     setExamPrepLoading(true);
     setErrorMsg("");
     try {
-      const res = await fetch("/api/ai/exam-prep", {
+      const res = await apiClient("/api/ai/exam-prep", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ examId: selectedExamId }),
       });
-      const data = await res.json();
-      if (res.ok) {
-        setExamPrepResult(data.data);
-      } else {
-        setErrorMsg(data.message || "Failed to generate exam prep guide.");
-      }
-    } catch {
-      setErrorMsg("Network error generating exam prep.");
+      setExamPrepResult(res.data);
+    } catch (err) {
+      setErrorMsg(err.message || "Failed to generate exam prep guide.");
     } finally {
       setExamPrepLoading(false);
     }
@@ -428,38 +449,242 @@ export function AiPage() {
                     <span>{generatedPlan.disclaimer}</span>
                   </div>
 
-                  {/* Proposed Plan Items */}
+                  {/* Proposed Plan Items with Inline Editing */}
                   <div className="mt-6 space-y-3">
-                    {generatedPlan.items.map((item, idx) => (
-                      <div
-                        key={item.id || idx}
-                        className="flex flex-col gap-2 rounded-lg border border-slate-200 p-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between"
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        Roadmap Sessions ({generatedPlan.items.length})
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleAddPlanItem}
+                        className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400"
                       >
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-slate-900 dark:text-slate-100">
-                              {item.title}
-                            </span>
-                            <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-                              {item.subjectName}
-                            </span>
-                          </div>
-                          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                            {item.description}
-                          </p>
-                        </div>
+                        <Plus className="h-3.5 w-3.5" />
+                        <span>Add Task</span>
+                      </button>
+                    </div>
 
-                        <div className="flex items-center gap-3 text-xs text-slate-500 shrink-0">
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5" />
-                            {item.durationMinutes} min
-                          </span>
-                          <span className="rounded bg-amber-100 px-2 py-0.5 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-                            {item.category}
-                          </span>
+                    {generatedPlan.items.map((item, idx) => {
+                      const isEditing = editingItemIndex === idx;
+
+                      if (isEditing) {
+                        return (
+                          <div
+                            key={item.id || idx}
+                            className="rounded-lg border border-blue-300 dark:border-blue-700 bg-blue-50/40 dark:bg-blue-950/20 p-4 space-y-3"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-blue-700 dark:text-blue-300">
+                                Editing Task #{idx + 1}
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingItemIndex(null)}
+                                  className="flex items-center gap-1 rounded bg-blue-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-blue-700"
+                                >
+                                  <Check className="h-3 w-3" />
+                                  <span>Done</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeletePlanItem(idx)}
+                                  className="flex items-center gap-1 rounded bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 dark:bg-rose-950/30 dark:text-rose-400"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                  <span>Remove</span>
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="grid gap-3 sm:grid-cols-2">
+                              <div className="sm:col-span-2">
+                                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                  Task Title *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={item.title}
+                                  onChange={(e) =>
+                                    handleUpdatePlanItem(
+                                      idx,
+                                      "title",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                                />
+                              </div>
+
+                              <div className="sm:col-span-2">
+                                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                  Description / Notes
+                                </label>
+                                <input
+                                  type="text"
+                                  value={item.description || ""}
+                                  onChange={(e) =>
+                                    handleUpdatePlanItem(
+                                      idx,
+                                      "description",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                  Course Subject
+                                </label>
+                                <select
+                                  value={item.subjectId || ""}
+                                  onChange={(e) =>
+                                    handleUpdatePlanItem(
+                                      idx,
+                                      "subjectId",
+                                      e.target.value || null
+                                    )
+                                  }
+                                  className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                                >
+                                  <option value="">General (No Subject)</option>
+                                  {subjects.map((s) => (
+                                    <option key={s.id} value={s.id}>
+                                      {s.code} - {s.name}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              <div>
+                                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                  Duration (Minutes)
+                                </label>
+                                <input
+                                  type="number"
+                                  min={15}
+                                  max={480}
+                                  step={15}
+                                  value={item.durationMinutes}
+                                  onChange={(e) =>
+                                    handleUpdatePlanItem(
+                                      idx,
+                                      "durationMinutes",
+                                      Number(e.target.value)
+                                    )
+                                  }
+                                  className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                  Priority
+                                </label>
+                                <select
+                                  value={item.priority || "MEDIUM"}
+                                  onChange={(e) =>
+                                    handleUpdatePlanItem(
+                                      idx,
+                                      "priority",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                                >
+                                  <option value="LOW">Low</option>
+                                  <option value="MEDIUM">Medium</option>
+                                  <option value="HIGH">High</option>
+                                  <option value="URGENT">Urgent</option>
+                                </select>
+                              </div>
+
+                              <div>
+                                <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                  Category
+                                </label>
+                                <select
+                                  value={item.category || "STUDY"}
+                                  onChange={(e) =>
+                                    handleUpdatePlanItem(
+                                      idx,
+                                      "category",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="mt-1 w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                                >
+                                  <option value="STUDY">Study</option>
+                                  <option value="REVISION">Revision</option>
+                                  <option value="ASSIGNMENT">Assignment</option>
+                                  <option value="PROJECT">Project</option>
+                                  <option value="OTHER">Other</option>
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div
+                          key={item.id || idx}
+                          className="flex flex-col gap-2 rounded-lg border border-slate-200 p-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-slate-900 dark:text-slate-100">
+                                {item.title}
+                              </span>
+                              <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                                {item.subjectName || "General"}
+                              </span>
+                            </div>
+                            {item.description && (
+                              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                {item.description}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <div className="flex items-center gap-2 text-xs text-slate-500 mr-2">
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3.5 w-3.5" />
+                                {item.durationMinutes} min
+                              </span>
+                              <span className="rounded bg-amber-100 px-2 py-0.5 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                                {item.category}
+                              </span>
+                              {item.priority && item.priority !== "MEDIUM" && (
+                                <span className="rounded bg-rose-100 px-2 py-0.5 text-rose-800 dark:bg-rose-950/30 dark:text-rose-300 font-semibold">
+                                  {item.priority}
+                                </span>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setEditingItemIndex(idx)}
+                              className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                              title="Edit task"
+                            >
+                              <Edit2 className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeletePlanItem(idx)}
+                              className="p-1 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400"
+                              title="Remove task"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ) : (
