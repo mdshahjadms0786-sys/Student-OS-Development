@@ -11,6 +11,7 @@
     "generate": "prisma generate",
     "push": "prisma db push",
     "migrate:dev": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
     "seed": "node src/seed.js",
     "build": "prisma generate",
     "test": "vitest run"
